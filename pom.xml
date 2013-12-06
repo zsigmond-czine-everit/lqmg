@@ -32,10 +32,10 @@
         <version>4</version>
     </parent>
 
-    <groupId>org.everit.osgi</groupId>
-    <artifactId>org.everit.osgi.lqmg</artifactId>
+<!--     <groupId>org.everit</groupId> -->
+    <artifactId>org.everit.lqmg</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>Liquibase-QueryDSL Model Generator</name>
     <description>A generator that supports creating QueryDSL metamodel from Liquibase changelog files via an embedded H2 database from the command line.</description>
 
@@ -67,19 +67,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.4.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>*</Import-Package>
-                        <Export-Package />
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.8</version>
@@ -106,7 +93,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.everit.osgi.lqmg.Main</mainClass>
+                            <mainClass>org.everit.lqmg.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
