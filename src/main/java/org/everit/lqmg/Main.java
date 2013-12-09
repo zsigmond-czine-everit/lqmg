@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import liquibase.Liquibase;
-import liquibase.database.Database;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -40,26 +40,26 @@ import com.mysema.query.sql.codegen.MetaDataExporter;
 
 public class Main {
 
-    public static void generate(final String changeLogFile, final String packageName, final String targetFolder,
-            final String excludeChangeLogFile) {
-        if ((changeLogFile == null) || (packageName == null) || (targetFolder == null)) {
-            System.out
-                    .println("Missing reguired parameters. Reguired parameters: changeLogFile, packageName, targetFolder");
-            return;
-        }
+    public static void generate(final String changeLogFile, final String targetFolder, final String packageName,
+            final boolean schemaToPackage, final String schemaPattern) {
 
         Driver h2Driver = Driver.load();
         Connection connection = null;
         try {
             connection = h2Driver.connect("jdbc:h2:mem:", new Properties());
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
-                    new JdbcConnection(connection));
-            Liquibase liquibase =
-                    new Liquibase(changeLogFile, new FileSystemResourceAccessor(), database);
+            AbstractJdbcDatabase database =
+                    (AbstractJdbcDatabase) DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+                            new JdbcConnection(connection));
+
+            Liquibase liquibase = new Liquibase(changeLogFile, new FileSystemResourceAccessor(), database);
             liquibase.update(null);
 
             MetaDataExporter metaDataExporter = new MetaDataExporter();
+            metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
             metaDataExporter.setPackageName(packageName);
+            metaDataExporter.setSchemaPattern(schemaPattern);
+
+            metaDataExporter.setSchemaToPackage(true);
             metaDataExporter.setTargetFolder(new File(targetFolder));
             metaDataExporter.export(connection.getMetaData());
 
@@ -91,9 +91,10 @@ public class Main {
         }
 
         String changeLogFile = null;
-        String packageName = null;
+        String packageName = "";
         String targetFolder = null;
-        String excludeChangeLogFile = null;
+        String schemaPattern = null;
+        boolean schemaToPackage = true;
 
         for (int i = 0, n = args.length; i < n; i++) {
             if (args[i].startsWith("--changeLogFile=")) {
@@ -102,25 +103,34 @@ public class Main {
                 packageName = args[i].substring("--packageName=".length());
             } else if (args[i].startsWith("--targetFolder=")) {
                 targetFolder = args[i].substring("--targetFolder=".length());
-            } else if (args[i].startsWith("--excludeChangeLogFile=")) {
-                excludeChangeLogFile = args[i].substring("--excludeChangeLogFile=".length());
+            } else if (args[i].startsWith("--schemaPattern=")) {
+                schemaPattern = args[i].substring("--excludeChangeLogFile=".length());
+            } else if (args[i].startsWith("--schemaToPackage=")) {
+                schemaToPackage = Boolean.valueOf(args[i].substring("--schemaToPackage=".length()));
             } else {
-                System.out
-                        .println("Unknown parameter '" + args[i]
-                                + "'. Run <with --help to get information about the possible parameters");
+                System.out.println("Unknown parameter '" + args[i]
+                        + "'. Run <with --help to get information about the possible parameters");
             }
         }
-        Main.generate(changeLogFile, packageName, targetFolder, excludeChangeLogFile);
+        if ((changeLogFile == null) || (targetFolder == null)) {
+            System.out
+                    .println("Missing reguired parameters. Reguired parameters: changeLogFile, packageName, targetFolder");
+            return;
+        }
+        Main.generate(changeLogFile, targetFolder, packageName, schemaToPackage, schemaPattern);
     }
 
     public static void printHelp() {
-        System.out.println("Example usage: lqmg.sh --changelogFile=/tmp/changelog.xml --packageName=foo"
+        System.out.println("Example usage: lqmg.sh --changeLogFile=/tmp/changelog.xml --packageName=foo"
                 + " --targetFolder=/tmp/generated\n");
         System.out.println("Arguments: \n");
         System.out.println("  --changeLogFile: Path to the liquibase changelog file");
-        System.out.println("  --packageName: The java package of the generated QueryDSL metamodel classes");
+        System.out.println("  --packageName: The java package of the generated QueryDSL metamodel classes"
+                + " (default: empty, that means that the package will be either empty or derived from the schema)");
         System.out.println("  --targetFolder: The folder where source will be generated to");
-        System.out.println("  --excludeChangeLogFile: Path to the liquibase changelog file which want to ignore.");
+        System.out.println("  --schemaPattern: a schema name pattern; must match the schema name as it is stored in"
+                + " the database; \"\" retrieves those without a schema; null means that the schema name should not"
+                + " be used to narrow the search (default: null)");
         System.out.println("  --help: This help\n\n");
     }
 }

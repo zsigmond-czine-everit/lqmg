@@ -33,7 +33,7 @@
     </parent>
 
 <!--     <groupId>org.everit</groupId> -->
-    <artifactId>org.everit.lqmg</artifactId>
+    <artifactId>org.everit.db.lqmg</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Liquibase-QueryDSL Model Generator</name>
@@ -143,14 +143,8 @@
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-osgi</artifactId>
+            <artifactId>liquibase-core</artifactId>
             <version>3.0.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.6.1</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
