@@ -38,10 +38,9 @@ import org.h2.Driver;
 
 import com.mysema.query.sql.codegen.MetaDataExporter;
 
-public class Main {
+public class LQMG {
 
-    public static void generate(final String changeLogFile, final String targetFolder, final String packageName,
-            final boolean schemaToPackage, final String schemaPattern) {
+    public static void generate(MataDataGenerationParameter parameters) {
 
         Driver h2Driver = Driver.load();
         Connection connection = null;
@@ -51,16 +50,17 @@ public class Main {
                     (AbstractJdbcDatabase) DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
                             new JdbcConnection(connection));
 
-            Liquibase liquibase = new Liquibase(changeLogFile, new FileSystemResourceAccessor(), database);
+            Liquibase liquibase = new Liquibase(parameters.getChangeLogFile(), new FileSystemResourceAccessor(),
+                    database);
             liquibase.update(null);
 
             MetaDataExporter metaDataExporter = new MetaDataExporter();
             metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
-            metaDataExporter.setPackageName(packageName);
-            metaDataExporter.setSchemaPattern(schemaPattern);
+            metaDataExporter.setPackageName(parameters.getPackageName());
+            metaDataExporter.setSchemaPattern(parameters.getSchemaPattern());
 
-            metaDataExporter.setSchemaToPackage(true);
-            metaDataExporter.setTargetFolder(new File(targetFolder));
+            metaDataExporter.setSchemaToPackage(parameters.isSchemaToPackage());
+            metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
             metaDataExporter.export(connection.getMetaData());
 
         } catch (SQLException e) {
@@ -86,7 +86,7 @@ public class Main {
 
     public static void main(final String[] args) {
         if ((args.length == 0) || ((args.length == 1) && "--help".equals(args[0]))) {
-            Main.printHelp();
+            LQMG.printHelp();
             return;
         }
 
@@ -94,7 +94,7 @@ public class Main {
         String packageName = "";
         String targetFolder = null;
         String schemaPattern = null;
-        boolean schemaToPackage = true;
+        Boolean schemaToPackage = true;
 
         for (int i = 0, n = args.length; i < n; i++) {
             if (args[i].startsWith("--changeLogFile=")) {
@@ -117,7 +117,20 @@ public class Main {
                     .println("Missing reguired parameters. Reguired parameters: changeLogFile, packageName, targetFolder");
             return;
         }
-        Main.generate(changeLogFile, targetFolder, packageName, schemaToPackage, schemaPattern);
+
+        MataDataGenerationParameter params = new MataDataGenerationParameter(changeLogFile, targetFolder);
+        if (schemaToPackage != null) {
+            params.setSchemaToPackage(schemaToPackage);
+        }
+
+        if (schemaPattern != null) {
+            params.setSchemaPattern(schemaPattern);
+        }
+
+        if (packageName != null) {
+            params.setPackageName(packageName);
+        }
+        LQMG.generate(params);
     }
 
     public static void printHelp() {
@@ -132,5 +145,9 @@ public class Main {
                 + " the database; \"\" retrieves those without a schema; null means that the schema name should not"
                 + " be used to narrow the search (default: null)");
         System.out.println("  --help: This help\n\n");
+    }
+
+    private LQMG() {
+        // private constructor for util class.
     }
 }

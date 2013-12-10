@@ -93,7 +93,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.everit.lqmg.Main</mainClass>
+                            <mainClass>org.everit.lqmg.LQMG</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
