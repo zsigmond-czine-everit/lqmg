@@ -24,12 +24,14 @@ Simplest way to use is copying the org.everit.db.lqmg-1.0.0.jar file and jar fil
 This command print help note. Wrote the example usage and describe the available arguments.
 
 Available arguments:
-* changeLogFile: path to the liquibase changelog file.
-* targetFolder: the folder where source will be generated to
-* packageName: the java package of the generated QueryDSL metamodel classes.
-* schemaPattern: a schema name pattern; must match the schema name as it is stored in the database.
-* schemaToPackage: the schema to package or not.
-* help: wrote the help note.
+* Required arguments:
+ * changeLogFile: path to the liquibase changelog file.
+ * targetFolder: the folder where source will be generated to
+* Optional arguments:
+ * packageName: the java package of the generated QueryDSL metamodel classes. Default value: "". 
+ * schemaPattern: a schema name pattern; must match the schema name as it is stored in the database. Default value: null.
+ * schemaToPackage: the schema to package or not. Default value: true.
+ * help: wrote the help note.
 
 Reguired arguments the changeLogFile and targetFolder. The other argument is optional.
 

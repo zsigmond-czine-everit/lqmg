@@ -32,7 +32,7 @@
         <version>4</version>
     </parent> 
 
-    <groupId>org.everit.db</groupId>
+    <!--<groupId>org.everit</groupId>-->
     <artifactId>org.everit.db.lqmg</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
