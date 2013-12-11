@@ -30,9 +30,9 @@
         <groupId>org.everit</groupId>
         <artifactId>oss</artifactId>
         <version>4</version>
-    </parent>
+    </parent> 
 
-<!--     <groupId>org.everit</groupId> -->
+    <!--<groupId>org.everit</groupId>-->
     <artifactId>org.everit.db.lqmg</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -93,7 +93,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.everit.lqmg.LQMG</mainClass>
+                            <mainClass>org.everit.db.lqmg.LQMG</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

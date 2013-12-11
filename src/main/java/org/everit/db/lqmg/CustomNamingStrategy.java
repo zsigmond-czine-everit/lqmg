@@ -1,4 +1,4 @@
-package org.everit.lqmg;
+package org.everit.db.lqmg;
 
 /*
  * Copyright (c) 2011, Everit Kft.
@@ -23,10 +23,13 @@ package org.everit.lqmg;
 
 import com.mysema.query.sql.codegen.DefaultNamingStrategy;
 
+/**
+ * This class defines custom conversion strategy from table to class and column to property names.
+ */
 public class CustomNamingStrategy extends DefaultNamingStrategy {
-    
+
     @Override
-    public String appendSchema(String packageName, String schemaName) {
+    public String appendSchema(final String packageName, final String schemaName) {
         String result = super.appendSchema(packageName, schemaName);
         if (result.startsWith(".")) {
             result = result.substring(1);
