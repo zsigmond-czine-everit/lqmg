@@ -34,7 +34,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
@@ -55,9 +54,9 @@ public class LQMG {
      * Generate the JAVA classes to QueryDSL from LiquiBase XML.
      * 
      * @param parameters
-     *            the parameters for the generation. See more {@link MetaDataGenerationParameter}.
+     *            the parameters for the generation. See more {@link GenerationProperties}.
      */
-    public static void generate(final MetaDataGenerationParameter parameters) {
+    public static void generate(final GenerationProperties parameters, final ResourceAccessor resourceAccessor) {
         LOGGER.log(Level.INFO, "Load driver.");
         Driver h2Driver = Driver.load();
         LOGGER.log(Level.INFO, "Loaded driver.");
@@ -72,15 +71,6 @@ public class LQMG {
             AbstractJdbcDatabase database =
                     (AbstractJdbcDatabase) DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
                             new JdbcConnection(connection));
-
-            ResourceAccessor resourceAccessor;
-            if (parameters.getChanglogPathType().equals(ChangeLogPathType.FILESYSTEM)) {
-                LOGGER.log(Level.INFO, "Set the FileSystemResourceAccessor.");
-                resourceAccessor = new FileSystemResourceAccessor();
-            } else {
-                LOGGER.log(Level.INFO, "Set the ClassLoaderResourceAccessor.");
-                resourceAccessor = new ClassLoaderResourceAccessor();
-            }
 
             LOGGER.log(Level.INFO, "Start LiguiBase and update.");
             Liquibase liquibase = new Liquibase(parameters.getChangeLogFile(), resourceAccessor, database);
@@ -166,7 +156,7 @@ public class LQMG {
         }
 
         LOGGER.log(Level.INFO, "Set the changeLogFile and targetFolder paramters.");
-        MetaDataGenerationParameter params = new MetaDataGenerationParameter(changeLogFile, targetFolder);
+        GenerationProperties params = new GenerationProperties(changeLogFile, targetFolder);
         if (schemaToPackage != null) {
             LOGGER.log(Level.INFO, "Set the schemaToPackage paramters.");
             params.setSchemaToPackage(schemaToPackage);
@@ -182,11 +172,8 @@ public class LQMG {
             params.setPackageName(packageName);
         }
 
-        LOGGER.log(Level.INFO, "Set the changlogPathType paramters.");
-        params.setChanglogPathType(ChangeLogPathType.FILESYSTEM);
-
         LOGGER.log(Level.INFO, "Starting generate.");
-        LQMG.generate(params);
+        LQMG.generate(params, new FileSystemResourceAccessor());
         LOGGER.log(Level.INFO, "Ended generate.");
     }
 

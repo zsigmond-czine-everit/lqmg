@@ -24,7 +24,7 @@ package org.everit.db.lqmg;
 /**
  * This class store all parameters which is required to the JAVA classes generation.
  */
-public class MetaDataGenerationParameter {
+public class GenerationProperties {
 
     /**
      * Path to the liquibase changelog file.
@@ -52,11 +52,6 @@ public class MetaDataGenerationParameter {
     private String schemaPattern;
 
     /**
-     * The changeLogFile path type. {@link ChangeLogPathType#FILESYSTEM} or {@link ChangeLogPathType#RESOURCE}.
-     */
-    private ChangeLogPathType changlogPathType = ChangeLogPathType.FILESYSTEM;
-
-    /**
      * The simple constructor.
      * 
      * @param changeLogFile
@@ -64,17 +59,13 @@ public class MetaDataGenerationParameter {
      * @param targetFolder
      *            the folder where source will be generated to.
      */
-    public MetaDataGenerationParameter(final String changeLogFile, final String targetFolder) {
+    public GenerationProperties(final String changeLogFile, final String targetFolder) {
         this.changeLogFile = changeLogFile;
         this.targetFolder = targetFolder;
     }
 
     public String getChangeLogFile() {
         return changeLogFile;
-    }
-
-    public final ChangeLogPathType getChanglogPathType() {
-        return changlogPathType;
     }
 
     public String getPackageName() {
@@ -95,10 +86,6 @@ public class MetaDataGenerationParameter {
 
     public void setChangeLogFile(final String changeLogFile) {
         this.changeLogFile = changeLogFile;
-    }
-
-    public final void setChanglogPathType(final ChangeLogPathType changlogPathType) {
-        this.changlogPathType = changlogPathType;
     }
 
     public void setPackageName(final String packageName) {
