@@ -38,6 +38,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.h2.Driver;
+
 import com.mysema.query.sql.codegen.MetaDataExporter;
 
 /**
@@ -71,7 +72,6 @@ public class LQMG {
             AbstractJdbcDatabase database =
                     (AbstractJdbcDatabase) DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
                             new JdbcConnection(connection));
-
             LOGGER.log(Level.INFO, "Start LiguiBase and update.");
             Liquibase liquibase = new Liquibase(parameters.getChangeLogFile(), resourceAccessor, database);
             liquibase.update(null);
@@ -90,10 +90,13 @@ public class LQMG {
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
         } catch (DatabaseException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
         } catch (LiquibaseException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
         } finally {
             if (connection != null) {
                 try {
@@ -101,6 +104,7 @@ public class LQMG {
                     LOGGER.log(Level.INFO, "Connection closed.");
                 } catch (SQLException e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                    throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
                 }
             }
         }
