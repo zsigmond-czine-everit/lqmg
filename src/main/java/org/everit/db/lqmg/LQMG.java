@@ -87,16 +87,22 @@ public class LQMG {
             metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
             metaDataExporter.export(connection.getMetaData());
             LOGGER.log(Level.INFO, "Finish meta data export.");
-
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
+            // error to create connetion.
+            // error connection.getMetaDAta
+            // error when export database.
+            throw new LiquiBaseQueryDSLModellGeneratorException("Error during try to connection the database.", e);
         } catch (DatabaseException e) {
+            // fincorrectDataBaseImplementation
+
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException("Not find the correct database implementation", e);
         } catch (LiquibaseException e) {
+            // liquibase.update(null);
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException("Error during processing XML file."
+                    + parameters.getChangeLogFile(), e);
         } finally {
             if (connection != null) {
                 try {
@@ -104,7 +110,7 @@ public class LQMG {
                     LOGGER.log(Level.INFO, "Connection closed.");
                 } catch (SQLException e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                    throw new LiquiBaseQueryDSLModellGeneratorException("Exception message: " + e.getMessage(), e);
+                    throw new LiquiBaseQueryDSLModellGeneratorException("Unsuccesfull the connection close.", e);
                 }
             }
         }
