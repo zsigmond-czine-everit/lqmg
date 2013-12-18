@@ -29,7 +29,7 @@ public class GenerationProperties {
     /**
      * Path to the liquibase changelog file.
      */
-    private String changeLogFile;
+    private String logicalFilePath;
 
     /**
      * The folder where source will be generated to.
@@ -50,22 +50,28 @@ public class GenerationProperties {
      * A schema name pattern; must match the schema name as it is stored in the database.
      */
     private String schemaPattern;
+    
+    /**
+     * The paths to the bundles (directory path of jar file path).
+     */
+    private String[] bundlePaths;
 
     /**
      * The simple constructor.
      * 
-     * @param changeLogFile
+     * @param logicalFilePath
      *            path to the liquibase changelog file.
      * @param targetFolder
      *            the folder where source will be generated to.
      */
-    public GenerationProperties(final String changeLogFile, final String targetFolder) {
-        this.changeLogFile = changeLogFile;
+    public GenerationProperties(final String logicalFilePath, final String[] bundlePaths, final String targetFolder) {
+        this.logicalFilePath = logicalFilePath;
         this.targetFolder = targetFolder;
+        this.bundlePaths = bundlePaths;
     }
 
-    public String getChangeLogFile() {
-        return changeLogFile;
+    public String getLogicalFilePath() {
+        return logicalFilePath;
     }
 
     public String getPackageName() {
@@ -84,8 +90,8 @@ public class GenerationProperties {
         return schemaToPackage;
     }
 
-    public void setChangeLogFile(final String changeLogFile) {
-        this.changeLogFile = changeLogFile;
+    public void setLogicalFilePath(final String changeLogFile) {
+        this.logicalFilePath = changeLogFile;
     }
 
     public void setPackageName(final String packageName) {
@@ -103,5 +109,8 @@ public class GenerationProperties {
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
     }
-
+    
+    public String[] getBundlePaths() {
+        return bundlePaths;
+    }
 }
