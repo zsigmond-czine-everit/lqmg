@@ -24,6 +24,10 @@ package org.everit.db.lqmg;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +41,24 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
+import org.apache.felix.framework.Felix;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.utils.manifest.Attribute;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Directive;
+import org.apache.felix.utils.manifest.Parser;
 import org.h2.Driver;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Capability;
 
 import com.mysema.query.sql.codegen.MetaDataExporter;
 
@@ -45,6 +66,10 @@ import com.mysema.query.sql.codegen.MetaDataExporter;
  * This class responsible for generate QueryDSL JAVA classes.
  */
 public class LQMG {
+
+    public static final String CAPABILITY_LIQUIBASE_SCHEMA = "liquibase.schema";
+    public static final String CAPABILITY_ATTR_SCHEMA_NAME = "schemaName";
+    public static final String CAPABILITY_ATTR_SCHEMA_RESOURCE = "schemaResource";
 
     private static final String ARG_SCHEMA_TO_PACKAGE = "schemaToPackage";
     private static final String ARG_SCHEMA_PATTERN = "schemaPattern";
@@ -64,10 +89,49 @@ public class LQMG {
      *            the parameters for the generation. See more {@link GenerationProperties}.
      */
     public static void generate(final GenerationProperties parameters) {
+
+        Framework osgiContainer = null;
+        try {
+            osgiContainer = startOSGiContainer(parameters.getBundlePaths());
+
+            BundleCapability[] capabilities = findMatchingCapabilities(osgiContainer, parameters.getTopSchema());
+            if (capabilities.length == 0) {
+                LOGGER.log(Level.WARNING, "Did not find matching schema for generation");
+                return;
+            }
+            for (BundleCapability bundleCapability : capabilities) {
+                tryCodeGeneration(parameters, bundleCapability);
+            }
+        } finally {
+            if (osgiContainer != null) {
+                try {
+                    osgiContainer.stop();
+                    osgiContainer.waitForStop(0);
+                } catch (BundleException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
+    }
+
+    private static void tryCodeGeneration(final GenerationProperties parameters, BundleCapability bundleCapability) {
+
+        Map<String, Object> attributes = bundleCapability.getAttributes();
+        Object schemaResourceAttribute = attributes.get(CAPABILITY_ATTR_SCHEMA_RESOURCE);
+        if (schemaResourceAttribute == null) {
+            // TODO throw a runtime exception
+        }
+        
+
         LOGGER.log(Level.INFO, "Load driver.");
         Driver h2Driver = Driver.load();
         LOGGER.log(Level.INFO, "Loaded driver.");
-
         Connection connection = null;
         try {
             LOGGER.log(Level.INFO, "Creating connection.");
@@ -79,20 +143,11 @@ public class LQMG {
                     (AbstractJdbcDatabase) DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
                             new JdbcConnection(connection));
             LOGGER.log(Level.INFO, "Start LiguiBase and update.");
-            Liquibase liquibase = new Liquibase(parameters.getLogicalFilePath(), resourceAccessor, database);
+            Liquibase liquibase = new Liquibase(parameters.getTopSchema(), resourceAccessor, database);
             liquibase.update(null);
             LOGGER.log(Level.INFO, "Finish LiguiBase and update.");
 
-            LOGGER.log(Level.INFO, "Start meta data export.");
-            MetaDataExporter metaDataExporter = new MetaDataExporter();
-            metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
-            metaDataExporter.setPackageName(parameters.getPackageName());
-            metaDataExporter.setSchemaPattern(parameters.getSchemaPattern());
-
-            metaDataExporter.setSchemaToPackage(parameters.isSchemaToPackage());
-            metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
-            metaDataExporter.export(connection.getMetaData());
-            LOGGER.log(Level.INFO, "Finish meta data export.");
+            exportMetaData(parameters, connection);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             // error to create connection.
@@ -107,7 +162,7 @@ public class LQMG {
             // liquibase.update(null);
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new LiquiBaseQueryDSLModellGeneratorException("Error during processing XML file; "
-                    + parameters.getLogicalFilePath(), e);
+                    + parameters.getTopSchema(), e);
         } finally {
             if (connection != null) {
                 try {
@@ -119,6 +174,97 @@ public class LQMG {
                 }
             }
         }
+    }
+
+    private static void exportMetaData(final GenerationProperties parameters, final Connection connection)
+            throws SQLException {
+        LOGGER.log(Level.INFO, "Start meta data export.");
+        MetaDataExporter metaDataExporter = new MetaDataExporter();
+        metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
+        metaDataExporter.setPackageName(parameters.getPackageName());
+        metaDataExporter.setSchemaPattern(parameters.getSchemaPattern());
+
+        metaDataExporter.setSchemaToPackage(parameters.isSchemaToPackage());
+        metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
+        metaDataExporter.export(connection.getMetaData());
+        LOGGER.log(Level.INFO, "Finish meta data export.");
+    }
+
+    private static BundleCapability[] findMatchingCapabilities(Framework framework, String topSchema) {
+        Clause[] clauses = Parser.parseHeader(topSchema);
+        if (clauses.length != 1) {
+            // TODO throw exception
+        }
+        Clause clause = clauses[0];
+        String schemaName = clause.getName();
+        Attribute[] attributes = clause.getAttributes();
+        if (attributes.length > 0) {
+            // TODO throw excetpion that no attributes are supported
+        }
+        Directive[] directives = clause.getDirectives();
+        if (directives.length > 1) {
+            // TODO throw exception that onl
+        }
+        Filter filter = null;
+        if (directives.length == 1) {
+            if (!Constants.FILTER_DIRECTIVE.equals(directives[0].getName())) {
+                // TODO throw exception as only filter is supported
+            }
+            String filterString = directives[0].getValue();
+            try {
+                filter = FrameworkUtil.createFilter(filterString);
+            } catch (InvalidSyntaxException e) {
+                // TODO throw runtime exception
+                e.printStackTrace();
+            }
+        }
+
+        return findMatchingCapabilities(framework, schemaName, filter);
+    }
+
+    private static BundleCapability[] findMatchingCapabilities(Framework framework, String schemaName, Filter filter) {
+        List<BundleCapability> capabilities = new ArrayList<BundleCapability>();
+
+        Bundle[] bundles = framework.getBundleContext().getBundles();
+        for (Bundle bundle : bundles) {
+            BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+            List<BundleCapability> potentialCapabilities = bundleWiring.getCapabilities(CAPABILITY_LIQUIBASE_SCHEMA);
+            for (BundleCapability potentialCapability : potentialCapabilities) {
+                Map<String, Object> attributes = potentialCapability.getAttributes();
+                Object schemaNameAttribute = attributes.get(CAPABILITY_ATTR_SCHEMA_NAME);
+                if (schemaName.equals(schemaNameAttribute) && filter.matches(attributes)) {
+                    capabilities.add(potentialCapability);
+                }
+            }
+        }
+
+        return capabilities.toArray(new BundleCapability[0]);
+    }
+
+    private static Framework startOSGiContainer(String[] bundlePaths) {
+        HashMap<Object, Object> felixConfig = new HashMap<Object, Object>();
+        // We do not want to start any bundles just to resolve them
+        felixConfig.put(FelixConstants.BUNDLE_DEFAULT_STARTLEVEL, 4);
+        felixConfig.put(FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL, 1);
+        Felix felix = new Felix(new HashMap<Object, Object>());
+
+        try {
+            felix.init();
+            felix.start();
+        } catch (BundleException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        BundleContext systemBundleContext = felix.getBundleContext();
+        for (String bundlePath : bundlePaths) {
+            try {
+                systemBundleContext.installBundle(bundlePath);
+            } catch (BundleException e) {
+                // TODO Log error
+                e.printStackTrace();
+            }
+        }
+        return felix;
     }
 
     /**

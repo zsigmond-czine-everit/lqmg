@@ -27,9 +27,9 @@ package org.everit.db.lqmg;
 public class GenerationProperties {
 
     /**
-     * Path to the liquibase changelog file.
+     * A schema name with optional filter expression that points to a bundle schema capability.
      */
-    private String logicalFilePath;
+    private String topSchema;
 
     /**
      * The folder where source will be generated to.
@@ -49,8 +49,8 @@ public class GenerationProperties {
     /**
      * A schema name pattern; must match the schema name as it is stored in the database.
      */
-    private String schemaPattern;
-    
+    private String schemaPattern = null;
+
     /**
      * The paths to the bundles (directory path of jar file path).
      */
@@ -59,19 +59,19 @@ public class GenerationProperties {
     /**
      * The simple constructor.
      * 
-     * @param logicalFilePath
-     *            path to the liquibase changelog file.
+     * @param topSchema
+     *            A schema name with optional capability filter where liquibase should start searching for changesets.
      * @param targetFolder
      *            the folder where source will be generated to.
      */
-    public GenerationProperties(final String logicalFilePath, final String[] bundlePaths, final String targetFolder) {
-        this.logicalFilePath = logicalFilePath;
+    public GenerationProperties(final String topSchema, final String[] bundlePaths, final String targetFolder) {
+        this.topSchema = topSchema;
         this.targetFolder = targetFolder;
         this.bundlePaths = bundlePaths;
     }
 
-    public String getLogicalFilePath() {
-        return logicalFilePath;
+    public String getTopSchema() {
+        return topSchema;
     }
 
     public String getPackageName() {
@@ -90,8 +90,8 @@ public class GenerationProperties {
         return schemaToPackage;
     }
 
-    public void setLogicalFilePath(final String changeLogFile) {
-        this.logicalFilePath = changeLogFile;
+    public void setTopSchema(final String topSchema) {
+        this.topSchema = topSchema;
     }
 
     public void setPackageName(final String packageName) {
@@ -109,7 +109,7 @@ public class GenerationProperties {
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
     }
-    
+
     public String[] getBundlePaths() {
         return bundlePaths;
     }
