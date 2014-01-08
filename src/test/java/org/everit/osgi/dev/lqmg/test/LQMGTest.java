@@ -25,8 +25,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.UUID;
 
-import org.everit.db.lqmg.GenerationProperties;
-import org.everit.db.lqmg.LQMG;
+import org.everit.osgi.dev.lqmg.GenerationProperties;
+import org.everit.osgi.dev.lqmg.LQMG;
 import org.junit.Assert;
 import org.junit.Test;
 

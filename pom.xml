@@ -105,7 +105,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>org.everit.db.lqmg.LQMG</mainClass>
+              <mainClass>org.everit.osgi.dev.lqmg.LQMG</mainClass>
             </manifest>
           </archive>
         </configuration>

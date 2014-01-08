@@ -1,4 +1,4 @@
-package org.everit.db.lqmg.internal;
+package org.everit.osgi.dev.lqmg.internal;
 
 /*
  * Copyright (c) 2011, Everit Kft.

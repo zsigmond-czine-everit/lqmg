@@ -1,4 +1,4 @@
-package org.everit.db.lqmg;
+package org.everit.osgi.dev.lqmg;
 
 /*
  * Copyright (c) 2011, Everit Kft.
@@ -41,7 +41,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
-import org.everit.db.lqmg.internal.CustomNamingStrategy;
+import org.everit.osgi.dev.lqmg.internal.CustomNamingStrategy;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
 import org.h2.Driver;
