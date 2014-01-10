@@ -29,7 +29,7 @@ public class GenerationProperties {
     /**
      * A schema name with optional filter expression that points to a bundle schema capability.
      */
-    private String topSchema;
+    private String schema;
 
     /**
      * The folder where source will be generated to.
@@ -65,13 +65,13 @@ public class GenerationProperties {
      *            the folder where source will be generated to.
      */
     public GenerationProperties(final String topSchema, final String[] bundlePaths, final String targetFolder) {
-        this.topSchema = topSchema;
+        this.schema = topSchema;
         this.targetFolder = targetFolder;
         this.bundlePaths = bundlePaths;
     }
 
-    public String getTopSchema() {
-        return topSchema;
+    public String getSchema() {
+        return schema;
     }
 
     public String getPackageName() {
@@ -90,8 +90,8 @@ public class GenerationProperties {
         return schemaToPackage;
     }
 
-    public void setTopSchema(final String topSchema) {
-        this.topSchema = topSchema;
+    public void setSchema(final String topSchema) {
+        this.schema = topSchema;
     }
 
     public void setPackageName(final String packageName) {
