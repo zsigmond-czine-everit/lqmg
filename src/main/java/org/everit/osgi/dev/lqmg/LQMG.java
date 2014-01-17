@@ -76,6 +76,58 @@ public class LQMG {
      */
     private static final Logger LOGGER = Logger.getLogger(LQMG.class.getName());
 
+    private static File createTempDirectory() throws IOException {
+        final File temp = File.createTempFile("lqmg-",
+                Long.toString(System.nanoTime()));
+
+        if (!(temp.delete())) {
+            throw new IOException("Could not delete temp file: "
+                    + temp.getAbsolutePath());
+        }
+
+        if (!(temp.mkdir())) {
+            throw new IOException("Could not create temp directory: "
+                    + temp.getAbsolutePath());
+        }
+
+        return temp;
+    }
+
+    private static void deleteFolder(final File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) { // some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    LQMG.deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+    }
+
+    private static String evaluateArgValue(final String fullArg, final String argName) {
+        String result = fullArg.substring(("--" + argName + "=").length());
+        LOGGER.log(Level.INFO, "The " + argName + " argument: " + result);
+        return result;
+    }
+
+    private static void exportMetaData(final GenerationProperties parameters,
+            final Connection connection) throws SQLException {
+        LOGGER.log(Level.INFO, "Start meta data export.");
+        MetaDataExporter metaDataExporter = new MetaDataExporter();
+        metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
+        metaDataExporter.setPackageName(parameters.getPackageName());
+        metaDataExporter.setSchemaPattern(parameters.getSchemaPattern());
+
+        metaDataExporter.setSchemaToPackage(parameters.isSchemaToPackage());
+        metaDataExporter
+                .setTargetFolder(new File(parameters.getTargetFolder()));
+        metaDataExporter.export(connection.getMetaData());
+        LOGGER.log(Level.INFO, "Finish meta data export.");
+    }
+
     /**
      * Generate the JAVA classes to QueryDSL from LiquiBase XML.
      * 
@@ -87,8 +139,8 @@ public class LQMG {
         Framework osgiContainer = null;
         File tempDirectory = null;
         try {
-            tempDirectory = createTempDirectory();
-            osgiContainer = startOSGiContainer(parameters.getBundlePaths(), tempDirectory.getAbsolutePath());
+            tempDirectory = LQMG.createTempDirectory();
+            osgiContainer = LQMG.startOSGiContainer(parameters.getBundlePaths(), tempDirectory.getAbsolutePath());
 
             Map<Bundle, List<BundleCapability>> matchingBundles = LiquibaseOSGiUtil
                     .findBundlesBySchemaExpression(parameters.getSchema(),
@@ -118,7 +170,7 @@ public class LQMG {
                         + matchingCapabilities.toString());
             }
             BundleCapability matchingCapability = matchingCapabilities.get(0);
-            tryCodeGeneration(parameters, bundle, matchingCapability);
+            LQMG.tryCodeGeneration(parameters, bundle, matchingCapability);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Could not create temp directory", e);
             return;
@@ -137,151 +189,10 @@ public class LQMG {
                 }
             }
             if (tempDirectory != null) {
-                deleteFolder(tempDirectory);
+                LQMG.deleteFolder(tempDirectory);
             }
         }
 
-    }
-
-    private static void deleteFolder(File folder) {
-        File[] files = folder.listFiles();
-        if (files != null) { // some JVMs return null for empty dirs
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    f.delete();
-                }
-            }
-        }
-        folder.delete();
-    }
-
-    private static void tryCodeGeneration(
-            final GenerationProperties parameters, Bundle bundle,
-            BundleCapability bundleCapability) {
-
-        Map<String, Object> attributes = bundleCapability.getAttributes();
-        Object schemaResourceAttribute = attributes
-                .get(CAPABILITY_ATTR_SCHEMA_RESOURCE);
-        if (schemaResourceAttribute == null) {
-            LOGGER.severe("Could not generate source as schema resource is not specified in Provide-Capability");
-            return;
-        }
-
-        LOGGER.log(Level.INFO, "Load driver.");
-        Driver h2Driver = Driver.load();
-        LOGGER.log(Level.INFO, "Loaded driver.");
-        Connection connection = null;
-        try {
-            LOGGER.log(Level.INFO, "Creating connection.");
-            connection = h2Driver.connect("jdbc:h2:mem:", new Properties());
-            LOGGER.log(Level.INFO, "Created connection.");
-
-            LOGGER.log(Level.INFO, "Get database.");
-            AbstractJdbcDatabase database = new H2Database();
-            database.setConnection(new JdbcConnection(connection));
-
-            LOGGER.log(Level.INFO, "Start LiguiBase and update.");
-            ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle);
-            String schemaResource = (String) bundleCapability.getAttributes()
-                    .get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
-            Liquibase liquibase = new Liquibase(schemaResource,
-                    resourceAccessor, database);
-            liquibase.update(null);
-            LOGGER.log(Level.INFO, "Finish LiguiBase and update.");
-
-            exportMetaData(parameters, connection);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            // error to create connection.
-            // error connection.getMetaData
-            // error when export database.
-            throw new LiquiBaseQueryDSLModellGeneratorException(
-                    "Error during try to connection the database.", e);
-        } catch (DatabaseException e) {
-            // fincorrectDataBaseImplementation
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException(
-                    "Unable to find the correct database implementation", e);
-        } catch (LiquibaseException e) {
-            // liquibase.update(null);
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException(
-                    "Error during processing XML file; "
-                            + parameters.getSchema(), e);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                    LOGGER.log(Level.INFO, "Connection closed.");
-                } catch (SQLException e) {
-                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                    throw new LiquiBaseQueryDSLModellGeneratorException(
-                            "Closing the connection was unsuccessful.", e);
-                }
-            }
-        }
-    }
-
-    private static void exportMetaData(final GenerationProperties parameters,
-            final Connection connection) throws SQLException {
-        LOGGER.log(Level.INFO, "Start meta data export.");
-        MetaDataExporter metaDataExporter = new MetaDataExporter();
-        metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
-        metaDataExporter.setPackageName(parameters.getPackageName());
-        metaDataExporter.setSchemaPattern(parameters.getSchemaPattern());
-
-        metaDataExporter.setSchemaToPackage(parameters.isSchemaToPackage());
-        metaDataExporter
-                .setTargetFolder(new File(parameters.getTargetFolder()));
-        metaDataExporter.export(connection.getMetaData());
-        LOGGER.log(Level.INFO, "Finish meta data export.");
-    }
-
-    private static Framework startOSGiContainer(String[] bundlePaths, String tempDirPath) throws BundleException {
-        FrameworkFactory frameworkFactory = ServiceLoader
-                .load(FrameworkFactory.class).iterator().next();
-
-        Map<String, String> config = new HashMap<String, String>();
-        config.put("osgi.configuration.area", tempDirPath);
-        config.put("osgi.baseConfiguration.area", tempDirPath);
-        config.put("osgi.sharedConfiguration.area", tempDirPath);
-        config.put("osgi.instance.area", tempDirPath);
-        config.put("osgi.user.area", tempDirPath);
-
-        Framework framework = frameworkFactory.newFramework(config);
-        framework.start();
-
-        BundleContext systemBundleContext = framework.getBundleContext();
-        for (String bundlePath : bundlePaths) {
-            try {
-                systemBundleContext.installBundle(bundlePath);
-            } catch (BundleException e) {
-                LOGGER.log(Level.WARNING, "Could not start bundle " + bundlePath, e);
-            }
-        }
-        FrameworkWiring frameworkWiring = framework
-                .adapt(FrameworkWiring.class);
-        frameworkWiring.resolveBundles(null);
-        return framework;
-    }
-
-    private static File createTempDirectory() throws IOException {
-        final File temp = File.createTempFile("lqmg-",
-                Long.toString(System.nanoTime()));
-
-        if (!(temp.delete())) {
-            throw new IOException("Could not delete temp file: "
-                    + temp.getAbsolutePath());
-        }
-
-        if (!(temp.mkdir())) {
-            throw new IOException("Could not create temp directory: "
-                    + temp.getAbsolutePath());
-        }
-
-        return temp;
     }
 
     /**
@@ -309,18 +220,18 @@ public class LQMG {
         LOGGER.log(Level.INFO, "Processing arguments.");
         for (int i = 0, n = args.length; i < n; i++) {
             if (args[i].startsWith("--" + ARG_SCHEMA)) {
-                logicalFilePath = evaluateArgValue(args[i],
+                logicalFilePath = LQMG.evaluateArgValue(args[i],
                         ARG_SCHEMA);
             } else if (args[i].startsWith("--" + ARG_PACKAGE_NAME + "=")) {
-                packageName = evaluateArgValue(args[i], ARG_PACKAGE_NAME);
+                packageName = LQMG.evaluateArgValue(args[i], ARG_PACKAGE_NAME);
             } else if (args[i].startsWith("--" + ARG_BUNDLES + "=")) {
-                bundlesParam = evaluateArgValue(args[i], ARG_BUNDLES);
+                bundlesParam = LQMG.evaluateArgValue(args[i], ARG_BUNDLES);
             } else if (args[i].startsWith("--" + ARG_TARGET_FOLDER + "=")) {
-                targetFolder = evaluateArgValue(args[i], ARG_TARGET_FOLDER);
+                targetFolder = LQMG.evaluateArgValue(args[i], ARG_TARGET_FOLDER);
             } else if (args[i].startsWith("--" + ARG_SCHEMA_PATTERN + "=")) {
-                schemaPattern = evaluateArgValue(args[i], ARG_SCHEMA_PATTERN);
+                schemaPattern = LQMG.evaluateArgValue(args[i], ARG_SCHEMA_PATTERN);
             } else if (args[i].startsWith("--" + ARG_SCHEMA_TO_PACKAGE + "=")) {
-                schemaToPackage = Boolean.valueOf(evaluateArgValue(args[i],
+                schemaToPackage = Boolean.valueOf(LQMG.evaluateArgValue(args[i],
                         ARG_SCHEMA_TO_PACKAGE));
             } else {
                 LOGGER.log(
@@ -344,8 +255,8 @@ public class LQMG {
             LOGGER.log(Level.SEVERE, "Missing required argument: "
                     + ARG_BUNDLES);
         }
-        if (logicalFilePath == null || targetFolder == null
-                || bundlesParam == null) {
+        if ((logicalFilePath == null) || (targetFolder == null)
+                || (bundlesParam == null)) {
             return;
         }
 
@@ -369,12 +280,6 @@ public class LQMG {
         LOGGER.log(Level.INFO, "Starting generate.");
         LQMG.generate(params);
         LOGGER.log(Level.INFO, "Ended generate.");
-    }
-
-    private static String evaluateArgValue(String fullArg, String argName) {
-        String result = fullArg.substring(("--" + argName + "=").length());
-        LOGGER.log(Level.INFO, "The " + argName + " argument: " + result);
-        return result;
     }
 
     /**
@@ -411,6 +316,113 @@ public class LQMG {
         System.out.println("  --" + ARG_SCHEMA_TO_PACKAGE
                 + ": the schema to package or not; (default: true)");
         System.out.println("  --help: This help\n\n");
+    }
+
+    private static Framework startOSGiContainer(final String[] bundlePaths, final String tempDirPath)
+            throws BundleException {
+        FrameworkFactory frameworkFactory = ServiceLoader
+                .load(FrameworkFactory.class).iterator().next();
+
+        Map<String, String> config = new HashMap<String, String>();
+        config.put("osgi.configuration.area", tempDirPath);
+        config.put("osgi.baseConfiguration.area", tempDirPath);
+        config.put("osgi.sharedConfiguration.area", tempDirPath);
+        config.put("osgi.instance.area", tempDirPath);
+        config.put("osgi.user.area", tempDirPath);
+        config.put("eclipse.consoleLog", "true");
+
+        Framework framework = frameworkFactory.newFramework(config);
+        framework.start();
+
+        BundleContext systemBundleContext = framework.getBundleContext();
+        for (String bundlePath : bundlePaths) {
+            try {
+                systemBundleContext.installBundle(bundlePath);
+            } catch (BundleException e) {
+                LOGGER.log(Level.WARNING, "Could not install bundle " + bundlePath, e);
+            }
+        }
+        FrameworkWiring frameworkWiring = framework
+                .adapt(FrameworkWiring.class);
+        frameworkWiring.resolveBundles(null);
+        Bundle[] bundles = systemBundleContext.getBundles();
+        for (Bundle b : bundles) {
+            if (b.getState() == Bundle.INSTALLED) {
+                try {
+                    b.start();
+                } catch (BundleException e) {
+                    LOGGER.log(Level.WARNING, e.getMessage());
+                }
+            }
+        }
+        return framework;
+    }
+
+    private static void tryCodeGeneration(
+            final GenerationProperties parameters, final Bundle bundle,
+            final BundleCapability bundleCapability) {
+
+        Map<String, Object> attributes = bundleCapability.getAttributes();
+        Object schemaResourceAttribute = attributes
+                .get(CAPABILITY_ATTR_SCHEMA_RESOURCE);
+        if (schemaResourceAttribute == null) {
+            LOGGER.severe("Could not generate source as schema resource is not specified in Provide-Capability");
+            return;
+        }
+
+        LOGGER.log(Level.INFO, "Load driver.");
+        Driver h2Driver = Driver.load();
+        LOGGER.log(Level.INFO, "Loaded driver.");
+        Connection connection = null;
+        try {
+            LOGGER.log(Level.INFO, "Creating connection.");
+            connection = h2Driver.connect("jdbc:h2:mem:", new Properties());
+            LOGGER.log(Level.INFO, "Created connection.");
+
+            LOGGER.log(Level.INFO, "Get database.");
+            AbstractJdbcDatabase database = new H2Database();
+            database.setConnection(new JdbcConnection(connection));
+
+            LOGGER.log(Level.INFO, "Start LiguiBase and update.");
+            ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle);
+            String schemaResource = (String) bundleCapability.getAttributes()
+                    .get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
+            Liquibase liquibase = new Liquibase(schemaResource,
+                    resourceAccessor, database);
+            liquibase.update(null);
+            LOGGER.log(Level.INFO, "Finish LiguiBase and update.");
+
+            LQMG.exportMetaData(parameters, connection);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            // error to create connection.
+            // error connection.getMetaData
+            // error when export database.
+            throw new LiquiBaseQueryDSLModellGeneratorException(
+                    "Error during try to connection the database.", e);
+        } catch (DatabaseException e) {
+            // fincorrectDataBaseImplementation
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException(
+                    "Unable to find the correct database implementation", e);
+        } catch (LiquibaseException e) {
+            // liquibase.update(null);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new LiquiBaseQueryDSLModellGeneratorException(
+                    "Error during processing XML file; "
+                            + parameters.getSchema(), e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                    LOGGER.log(Level.INFO, "Connection closed.");
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                    throw new LiquiBaseQueryDSLModellGeneratorException(
+                            "Closing the connection was unsuccessful.", e);
+                }
+            }
+        }
     }
 
     /**
