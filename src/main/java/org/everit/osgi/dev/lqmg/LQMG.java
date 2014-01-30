@@ -38,7 +38,6 @@ import liquibase.Liquibase;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
@@ -361,14 +360,14 @@ public class LQMG {
             AbstractJdbcDatabase database = new H2Database();
             database.setConnection(new JdbcConnection(connection));
 
-            LOGGER.log(Level.INFO, "Start LiguiBase and update.");
+            LOGGER.log(Level.INFO, "Start LiquiBase and update.");
             ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle);
             String schemaResource = (String) bundleCapability.getAttributes()
                     .get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
             Liquibase liquibase = new Liquibase(schemaResource,
                     resourceAccessor, database);
             liquibase.update(null);
-            LOGGER.log(Level.INFO, "Finish LiguiBase and update.");
+            LOGGER.log(Level.INFO, "Finish LiquiBase and update.");
 
             LQMG.exportMetaData(parameters, connection);
         } catch (SQLException e) {
@@ -378,11 +377,6 @@ public class LQMG {
             // error when export database.
             throw new LiquiBaseQueryDSLModellGeneratorException(
                     "Error during try to connection the database.", e);
-        } catch (DatabaseException e) {
-            // fincorrectDataBaseImplementation
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException(
-                    "Unable to find the correct database implementation", e);
         } catch (LiquibaseException e) {
             // liquibase.update(null);
             LOGGER.log(Level.SEVERE, e.getMessage(), e);

@@ -121,6 +121,36 @@ public class LQMGTest {
         }
     }
 
+    @Test
+    public void testLQMGwithWrongSQL() {
+        String tmpDirProperty = "java.io.tmpdir";
+        String tmpDir = System.getProperty(tmpDirProperty);
+        if (tmpDir == null) {
+            Assert.fail("User temp directory could not be retrieved");
+        }
+
+        ClassLoader classLoader = LQMGTest.class.getClassLoader();
+        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+
+        UUID uuid = UUID.randomUUID();
+        File tmpDirFile = new File(tmpDir);
+        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+        String tempFolderName = testDirFile.getAbsolutePath();
+
+        GenerationProperties props = new GenerationProperties("wrongSQL", new String[] {
+                "reference:" + bundle2URL.toExternalForm(),
+                "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
+        try {
+            LQMG.generate(props);
+            Assert.assertTrue(false);
+        } catch (LiquiBaseQueryDSLModellGeneratorException e) {
+            Assert.assertTrue(true);
+        } finally {
+            LQMGTest.deleteFolder(testDirFile);
+        }
+    }
+
     /**
      * Testing the command line processor with various attributes.
      */
