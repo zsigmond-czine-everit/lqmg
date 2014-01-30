@@ -28,7 +28,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
   objectQuotingStrategy="QUOTE_ALL_OBJECTS" logicalFilePath="org.everit.osgi.liquibase.bundle.tests.wrongSQL">
 
-<include file="eosgi:carandperson" relativeToChangelogFile="false" />
+  <include file="eosgi:carandperson" relativeToChangelogFile="false" />
 
   <changeSet id="1" author="everit">
     <sql>Wrong SQL Syntax</sql>

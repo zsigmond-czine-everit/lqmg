@@ -29,6 +29,5 @@
   objectQuotingStrategy="QUOTE_ALL_OBJECTS" logicalFilePath="org.everit.osgi.liquibase.bundle.tests.doubledCap">
 
   <changeSet id="1" author="everit">
-
   </changeSet>
 </databaseChangeLog>
