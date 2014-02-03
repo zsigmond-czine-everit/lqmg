@@ -38,7 +38,6 @@ import liquibase.Liquibase;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
@@ -219,7 +218,7 @@ public class LQMG {
 
         LOGGER.log(Level.INFO, "Processing arguments.");
         for (int i = 0, n = args.length; i < n; i++) {
-            if (args[i].startsWith("--" + ARG_SCHEMA)) {
+            if (args[i].startsWith("--" + ARG_SCHEMA + "=")) {
                 logicalFilePath = LQMG.evaluateArgValue(args[i],
                         ARG_SCHEMA);
             } else if (args[i].startsWith("--" + ARG_PACKAGE_NAME + "=")) {
@@ -262,20 +261,17 @@ public class LQMG {
 
         GenerationProperties params = new GenerationProperties(logicalFilePath,
                 bundlesParam.split(";"), targetFolder);
-        if (schemaToPackage != null) {
-            LOGGER.log(Level.INFO, "Set the schemaToPackage paramters.");
-            params.setSchemaToPackage(schemaToPackage);
-        }
+
+        LOGGER.log(Level.INFO, "Set the schemaToPackage paramters.");
+        params.setSchemaToPackage(schemaToPackage);
 
         if (schemaPattern != null) {
             LOGGER.log(Level.INFO, "Set the schemaPattern paramters.");
             params.setSchemaPattern(schemaPattern);
         }
 
-        if (packageName != null) {
-            LOGGER.log(Level.INFO, "Set the packageName paramters.");
-            params.setPackageName(packageName);
-        }
+        LOGGER.log(Level.INFO, "Set the packageName paramters.");
+        params.setPackageName(packageName);
 
         LOGGER.log(Level.INFO, "Starting generate.");
         LQMG.generate(params);
@@ -329,7 +325,6 @@ public class LQMG {
         config.put("osgi.sharedConfiguration.area", tempDirPath);
         config.put("osgi.instance.area", tempDirPath);
         config.put("osgi.user.area", tempDirPath);
-        config.put("eclipse.consoleLog", "true");
 
         Framework framework = frameworkFactory.newFramework(config);
         framework.start();
@@ -339,36 +334,18 @@ public class LQMG {
             try {
                 systemBundleContext.installBundle(bundlePath);
             } catch (BundleException e) {
-                LOGGER.log(Level.WARNING, "Could not install bundle " + bundlePath, e);
+                LOGGER.log(Level.WARNING, "Could not start bundle " + bundlePath, e);
             }
         }
         FrameworkWiring frameworkWiring = framework
                 .adapt(FrameworkWiring.class);
         frameworkWiring.resolveBundles(null);
-        Bundle[] bundles = systemBundleContext.getBundles();
-        for (Bundle b : bundles) {
-            if (b.getState() == Bundle.INSTALLED) {
-                try {
-                    b.start();
-                } catch (BundleException e) {
-                    LOGGER.log(Level.WARNING, e.getMessage());
-                }
-            }
-        }
         return framework;
     }
 
     private static void tryCodeGeneration(
             final GenerationProperties parameters, final Bundle bundle,
             final BundleCapability bundleCapability) {
-
-        Map<String, Object> attributes = bundleCapability.getAttributes();
-        Object schemaResourceAttribute = attributes
-                .get(CAPABILITY_ATTR_SCHEMA_RESOURCE);
-        if (schemaResourceAttribute == null) {
-            LOGGER.severe("Could not generate source as schema resource is not specified in Provide-Capability");
-            return;
-        }
 
         LOGGER.log(Level.INFO, "Load driver.");
         Driver h2Driver = Driver.load();
@@ -383,14 +360,14 @@ public class LQMG {
             AbstractJdbcDatabase database = new H2Database();
             database.setConnection(new JdbcConnection(connection));
 
-            LOGGER.log(Level.INFO, "Start LiguiBase and update.");
+            LOGGER.log(Level.INFO, "Start LiquiBase and update.");
             ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle);
             String schemaResource = (String) bundleCapability.getAttributes()
                     .get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
             Liquibase liquibase = new Liquibase(schemaResource,
                     resourceAccessor, database);
             liquibase.update(null);
-            LOGGER.log(Level.INFO, "Finish LiguiBase and update.");
+            LOGGER.log(Level.INFO, "Finish LiquiBase and update.");
 
             LQMG.exportMetaData(parameters, connection);
         } catch (SQLException e) {
@@ -400,11 +377,6 @@ public class LQMG {
             // error when export database.
             throw new LiquiBaseQueryDSLModellGeneratorException(
                     "Error during try to connection the database.", e);
-        } catch (DatabaseException e) {
-            // fincorrectDataBaseImplementation
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException(
-                    "Unable to find the correct database implementation", e);
         } catch (LiquibaseException e) {
             // liquibase.update(null);
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
