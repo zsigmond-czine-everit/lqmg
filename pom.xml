@@ -30,7 +30,7 @@
 
   <groupId>org.everit.osgi.dev</groupId>
   <artifactId>org.everit.osgi.dev.lqmg</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Everit - Liquibase-QueryDSL Model Generator</name>
   <description>

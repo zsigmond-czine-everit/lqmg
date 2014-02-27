@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import org.everit.osgi.dev.lqmg.GenerationProperties;
 import org.everit.osgi.dev.lqmg.LQMG;
-import org.everit.osgi.dev.lqmg.LiquiBaseQueryDSLModellGeneratorException;
+import org.everit.osgi.dev.lqmg.LiquiBaseQueryDSLModelGeneratorException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -108,7 +108,7 @@ public class LQMGTest {
 
             LQMG.generate(props);
             Assert.assertTrue(false);
-        } catch (LiquiBaseQueryDSLModellGeneratorException e) {
+        } catch (LiquiBaseQueryDSLModelGeneratorException e) {
             Assert.assertTrue(true);
         } finally {
             LQMGTest.deleteFolder(testDirFile);
@@ -138,7 +138,7 @@ public class LQMGTest {
         try {
             LQMG.generate(props);
             Assert.assertTrue(false);
-        } catch (LiquiBaseQueryDSLModellGeneratorException e) {
+        } catch (LiquiBaseQueryDSLModelGeneratorException e) {
             Assert.assertTrue(true);
         } finally {
             LQMGTest.deleteFolder(testDirFile);
