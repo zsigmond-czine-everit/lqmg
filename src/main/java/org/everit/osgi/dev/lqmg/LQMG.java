@@ -141,9 +141,7 @@ public class LQMG {
                             osgiContainer.getBundleContext(), Bundle.RESOLVED);
 
             if (matchingBundles.size() == 0) {
-                throw new LiquiBaseQueryDSLModellGeneratorException(
-                        "Could not find matching capability in any of the bundles for schema expression: "
-                                + parameters.getSchema(), null);
+                LQMG.handleCapabilityNotFound(parameters, osgiContainer);
             }
             if (matchingBundles.size() > 1) {
                 LOGGER.log(Level.WARNING,
@@ -187,6 +185,25 @@ public class LQMG {
             }
         }
 
+    }
+
+    private static void handleCapabilityNotFound(final GenerationProperties parameters, final Framework osgiContainer) {
+        BundleContext systemBundleContext = osgiContainer.getBundleContext();
+        Bundle[] bundles = systemBundleContext.getBundles();
+
+        for (Bundle bundle : bundles) {
+            if (bundle.getState() == Bundle.INSTALLED) {
+                try {
+                    bundle.start();
+                } catch (BundleException e) {
+                    LOGGER.log(Level.WARNING, "The bundle " + bundle.toString() + " could not be resolved", e);
+                }
+            }
+        }
+
+        throw new LiquiBaseQueryDSLModelGeneratorException(
+                "Could not find matching capability in any of the bundles for schema expression: "
+                        + parameters.getSchema(), null);
     }
 
     /**
@@ -335,6 +352,7 @@ public class LQMG {
         FrameworkWiring frameworkWiring = framework
                 .adapt(FrameworkWiring.class);
         frameworkWiring.resolveBundles(null);
+
         return framework;
     }
 
@@ -370,12 +388,12 @@ public class LQMG {
             // error to create connection.
             // error connection.getMetaData
             // error when export database.
-            throw new LiquiBaseQueryDSLModellGeneratorException(
+            throw new LiquiBaseQueryDSLModelGeneratorException(
                     "Error during try to connection the database.", e);
         } catch (LiquibaseException e) {
             // liquibase.update(null);
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModellGeneratorException(
+            throw new LiquiBaseQueryDSLModelGeneratorException(
                     "Error during processing XML file; "
                             + parameters.getSchema(), e);
         } finally {
@@ -385,7 +403,7 @@ public class LQMG {
                     LOGGER.log(Level.INFO, "Connection closed.");
                 } catch (SQLException e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                    throw new LiquiBaseQueryDSLModellGeneratorException(
+                    throw new LiquiBaseQueryDSLModelGeneratorException(
                             "Closing the connection was unsuccessful.", e);
                 }
             }
