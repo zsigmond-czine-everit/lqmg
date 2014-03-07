@@ -222,6 +222,12 @@
   </build>
 
   <dependencies>
+      <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+      <version>3.1.1</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>com.mysema.querydsl</groupId>
       <artifactId>querydsl-sql-codegen</artifactId>

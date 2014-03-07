@@ -15,20 +15,16 @@
  * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.everit.osgi.dev.lqmg;
+
 /**
  * This class store all parameters which is required to the JAVA classes generation.
  */
 public class GenerationProperties {
 
     /**
-     * A schema name with optional filter expression that points to a bundle schema capability.
+     * The paths to the bundles (directory path of jar file path).
      */
-    private String schema;
-
-    /**
-     * The folder where source will be generated to.
-     */
-    private String targetFolder;
+    private final String[] bundlePaths;
 
     /**
      * The java package of the generated QueryDSL metamodel classes.
@@ -36,9 +32,9 @@ public class GenerationProperties {
     private String packageName = "";
 
     /**
-     * The schema to package.
+     * A schema name with optional filter expression that points to a bundle schema capability.
      */
-    private boolean schemaToPackage = true;
+    private String schema;
 
     /**
      * A schema name pattern; must match the schema name as it is stored in the database.
@@ -46,9 +42,14 @@ public class GenerationProperties {
     private String schemaPattern = null;
 
     /**
-     * The paths to the bundles (directory path of jar file path).
+     * The schema to package.
      */
-    private String[] bundlePaths;
+    private boolean schemaToPackage = true;
+
+    /**
+     * The folder where source will be generated to.
+     */
+    private String targetFolder;
 
     /**
      * The simple constructor.
@@ -64,12 +65,16 @@ public class GenerationProperties {
         this.bundlePaths = bundlePaths;
     }
 
-    public String getSchema() {
-        return schema;
+    public String[] getBundlePaths() {
+        return bundlePaths;
     }
 
     public String getPackageName() {
         return packageName;
+    }
+
+    public String getSchema() {
+        return schema;
     }
 
     public String getSchemaPattern() {
@@ -84,12 +89,12 @@ public class GenerationProperties {
         return schemaToPackage;
     }
 
-    public void setSchema(final String topSchema) {
-        this.schema = topSchema;
-    }
-
     public void setPackageName(final String packageName) {
         this.packageName = packageName;
+    }
+
+    public void setSchema(final String topSchema) {
+        this.schema = topSchema;
     }
 
     public void setSchemaPattern(final String schemaPattern) {
@@ -102,9 +107,5 @@ public class GenerationProperties {
 
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
-    }
-
-    public String[] getBundlePaths() {
-        return bundlePaths;
     }
 }

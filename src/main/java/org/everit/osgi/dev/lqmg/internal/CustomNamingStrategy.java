@@ -15,6 +15,7 @@
  * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.everit.osgi.dev.lqmg.internal;
+
 import com.mysema.query.sql.codegen.DefaultNamingStrategy;
 
 /**

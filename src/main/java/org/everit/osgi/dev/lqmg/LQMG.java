@@ -55,16 +55,16 @@ import com.mysema.query.sql.codegen.MetaDataExporter;
  */
 public class LQMG {
 
-    public static final String CAPABILITY_LIQUIBASE_SCHEMA = "liquibase.schema";
+    private static final String ARG_BUNDLES = "bundles";
+    private static final String ARG_PACKAGE_NAME = "packageName";
+    private static final String ARG_SCHEMA = "schema";
+
+    private static final String ARG_SCHEMA_PATTERN = "schemaPattern";
+    private static final String ARG_SCHEMA_TO_PACKAGE = "schemaToPackage";
+    private static final String ARG_TARGET_FOLDER = "targetFolder";
     public static final String CAPABILITY_ATTR_SCHEMA_NAME = "name";
     public static final String CAPABILITY_ATTR_SCHEMA_RESOURCE = "resource";
-
-    private static final String ARG_SCHEMA_TO_PACKAGE = "schemaToPackage";
-    private static final String ARG_SCHEMA_PATTERN = "schemaPattern";
-    private static final String ARG_TARGET_FOLDER = "targetFolder";
-    private static final String ARG_PACKAGE_NAME = "packageName";
-    private static final String ARG_BUNDLES = "bundles";
-    private static final String ARG_SCHEMA = "schema";
+    public static final String CAPABILITY_LIQUIBASE_SCHEMA = "liquibase.schema";
     /**
      * The {@link Logger} instance for logging.
      */
@@ -229,26 +229,26 @@ public class LQMG {
         Boolean schemaToPackage = true;
 
         LOGGER.log(Level.INFO, "Processing arguments.");
-        for (int i = 0, n = args.length; i < n; i++) {
-            if (args[i].startsWith("--" + ARG_SCHEMA + "=")) {
-                logicalFilePath = LQMG.evaluateArgValue(args[i],
+        for (String arg : args) {
+            if (arg.startsWith("--" + ARG_SCHEMA + "=")) {
+                logicalFilePath = LQMG.evaluateArgValue(arg,
                         ARG_SCHEMA);
-            } else if (args[i].startsWith("--" + ARG_PACKAGE_NAME + "=")) {
-                packageName = LQMG.evaluateArgValue(args[i], ARG_PACKAGE_NAME);
-            } else if (args[i].startsWith("--" + ARG_BUNDLES + "=")) {
-                bundlesParam = LQMG.evaluateArgValue(args[i], ARG_BUNDLES);
-            } else if (args[i].startsWith("--" + ARG_TARGET_FOLDER + "=")) {
-                targetFolder = LQMG.evaluateArgValue(args[i], ARG_TARGET_FOLDER);
-            } else if (args[i].startsWith("--" + ARG_SCHEMA_PATTERN + "=")) {
-                schemaPattern = LQMG.evaluateArgValue(args[i], ARG_SCHEMA_PATTERN);
-            } else if (args[i].startsWith("--" + ARG_SCHEMA_TO_PACKAGE + "=")) {
-                schemaToPackage = Boolean.valueOf(LQMG.evaluateArgValue(args[i],
+            } else if (arg.startsWith("--" + ARG_PACKAGE_NAME + "=")) {
+                packageName = LQMG.evaluateArgValue(arg, ARG_PACKAGE_NAME);
+            } else if (arg.startsWith("--" + ARG_BUNDLES + "=")) {
+                bundlesParam = LQMG.evaluateArgValue(arg, ARG_BUNDLES);
+            } else if (arg.startsWith("--" + ARG_TARGET_FOLDER + "=")) {
+                targetFolder = LQMG.evaluateArgValue(arg, ARG_TARGET_FOLDER);
+            } else if (arg.startsWith("--" + ARG_SCHEMA_PATTERN + "=")) {
+                schemaPattern = LQMG.evaluateArgValue(arg, ARG_SCHEMA_PATTERN);
+            } else if (arg.startsWith("--" + ARG_SCHEMA_TO_PACKAGE + "=")) {
+                schemaToPackage = Boolean.valueOf(LQMG.evaluateArgValue(arg,
                         ARG_SCHEMA_TO_PACKAGE));
             } else {
                 LOGGER.log(
                         Level.INFO,
                         "Unknow parameter: "
-                                + args[i]
+                                + arg
                                 + "'. Run <with --help to get information about the possible parameters");
             }
         }
