@@ -62,9 +62,11 @@ public class LQMG {
     private static final String ARG_SCHEMA_PATTERN = "schemaPattern";
     private static final String ARG_SCHEMA_TO_PACKAGE = "schemaToPackage";
     private static final String ARG_TARGET_FOLDER = "targetFolder";
+
     public static final String CAPABILITY_ATTR_SCHEMA_NAME = "name";
     public static final String CAPABILITY_ATTR_SCHEMA_RESOURCE = "resource";
     public static final String CAPABILITY_LIQUIBASE_SCHEMA = "liquibase.schema";
+    public static final String CAPABILITY_QUERYDSL_PACKAGE = "querydsl.package";
     /**
      * The {@link Logger} instance for logging.
      */
