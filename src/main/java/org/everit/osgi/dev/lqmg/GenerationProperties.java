@@ -21,30 +21,27 @@ package org.everit.osgi.dev.lqmg;
  */
 public class GenerationProperties {
 
+    public static enum Scope {
+        CAPABILITY, BUNDLE, ALL
+    }
+
     /**
      * The paths to the bundles (directory path of jar file path).
      */
     private final String[] bundlePaths;
 
     /**
-     * The java package of the generated QueryDSL metamodel classes.
+     * The scope of tables/views that should be generated.
      */
-    private String packageName = "";
+    private Scope scope = Scope.BUNDLE;
 
     /**
-     * A schema name with optional filter expression that points to a bundle schema capability.
+     * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
+     * userMgmt;filter:="(version=2)"
      */
-    private String schema;
+    private String schemaCapability;
 
-    /**
-     * A schema name pattern; must match the schema name as it is stored in the database.
-     */
-    private String schemaPattern = null;
-
-    /**
-     * The schema to package.
-     */
-    private boolean schemaToPackage = true;
+    private String lqmgConfigurationPath = null;
 
     /**
      * The folder where source will be generated to.
@@ -60,7 +57,6 @@ public class GenerationProperties {
      *            the folder where source will be generated to.
      */
     public GenerationProperties(final String topSchema, final String[] bundlePaths, final String targetFolder) {
-        this.schema = topSchema;
         this.targetFolder = targetFolder;
         this.bundlePaths = bundlePaths;
     }
@@ -69,43 +65,36 @@ public class GenerationProperties {
         return bundlePaths;
     }
 
-    public String getPackageName() {
-        return packageName;
-    }
-
-    public String getSchema() {
-        return schema;
-    }
-
-    public String getSchemaPattern() {
-        return schemaPattern;
-    }
-
     public String getTargetFolder() {
         return targetFolder;
-    }
-
-    public boolean isSchemaToPackage() {
-        return schemaToPackage;
-    }
-
-    public void setPackageName(final String packageName) {
-        this.packageName = packageName;
-    }
-
-    public void setSchema(final String topSchema) {
-        this.schema = topSchema;
-    }
-
-    public void setSchemaPattern(final String schemaPattern) {
-        this.schemaPattern = schemaPattern;
-    }
-
-    public void setSchemaToPackage(final boolean schemaToPackage) {
-        this.schemaToPackage = schemaToPackage;
     }
 
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
     }
+
+    public Scope getScope() {
+        return scope;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
+    public String getSchemaCapability() {
+        return schemaCapability;
+    }
+
+    public void setSchemaCapability(String schemaCapability) {
+        this.schemaCapability = schemaCapability;
+    }
+
+    public String getLqmgConfigurationPath() {
+        return lqmgConfigurationPath;
+    }
+
+    public void setLqmgConfigurationPath(String lqmgConfigurationPath) {
+        this.lqmgConfigurationPath = lqmgConfigurationPath;
+    }
+
 }

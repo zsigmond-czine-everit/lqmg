@@ -15,6 +15,7 @@
  * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.everit.osgi.dev.lqmg.test;
+
 import java.io.File;
 import java.net.URL;
 import java.util.UUID;
@@ -100,7 +101,7 @@ public class LQMGTest {
         GenerationProperties props2 = new GenerationProperties("doubledCap", new String[] {
                 "reference:" + bundle2URL.toExternalForm(),
                 "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
-        props2.setSchema("doubledCap");
+        // props2.setSchema("doubledCap");
         props2.setTargetFolder(tempFolderName);
 
         try {

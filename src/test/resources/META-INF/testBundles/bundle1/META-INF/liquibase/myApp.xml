@@ -19,14 +19,14 @@
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
   objectQuotingStrategy="QUOTE_ALL_OBJECTS" logicalFilePath="org.everit.osgi.liquibase.bundle.tests.myApp">
 
   <include file="eosgi:carandperson" relativeToChangelogFile="false" />
 
   <changeSet id="1" author="everit">
-    <createTable tableName="car_registration">
+    <createTable tableName="car_registration" remarks="">
       <column name="car_registration_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false" />
       </column>
