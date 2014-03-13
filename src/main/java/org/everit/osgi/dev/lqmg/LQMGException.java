@@ -19,7 +19,7 @@ package org.everit.osgi.dev.lqmg;
 /**
  * The LiquiBase XML to QueryDSL metamodel generator exception.
  */
-public class LiquiBaseQueryDSLModelGeneratorException extends RuntimeException {
+public class LQMGException extends RuntimeException {
 
     /**
      * Generated seriar version UID.
@@ -34,7 +34,7 @@ public class LiquiBaseQueryDSLModelGeneratorException extends RuntimeException {
      * @param exception
      *            the exception
      */
-    public LiquiBaseQueryDSLModelGeneratorException(final String msg, final Throwable exception) {
+    public LQMGException(final String msg, final Throwable exception) {
         super(msg, exception);
     }
 

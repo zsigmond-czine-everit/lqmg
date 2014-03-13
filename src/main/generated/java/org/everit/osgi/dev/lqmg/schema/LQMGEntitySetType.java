@@ -15,16 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for LQMGEntityType complex type.
+ * <p>Java class for LQMGEntitySetType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LQMGEntityType">
+ * &lt;complexType name="LQMGEntitySetType">
  *   &lt;complexContent>
  *     &lt;extension base="{http://everit.org/lqmg}LQMGAbstractEntityType">
- *       &lt;attribute name="entityName" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="className" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="entityRegex" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="replaceExpression" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -33,62 +33,62 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LQMGEntityType")
-public class LQMGEntityType
+@XmlType(name = "LQMGEntitySetType")
+public class LQMGEntitySetType
     extends LQMGAbstractEntityType
 {
 
-    @XmlAttribute(name = "entityName", required = true)
-    protected String entityName;
-    @XmlAttribute(name = "className")
-    protected String className;
+    @XmlAttribute(name = "entityRegex", required = true)
+    protected String entityRegex;
+    @XmlAttribute(name = "replaceExpression")
+    protected String replaceExpression;
 
     /**
-     * Gets the value of the entityName property.
+     * Gets the value of the entityRegex property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getEntityName() {
-        return entityName;
+    public String getEntityRegex() {
+        return entityRegex;
     }
 
     /**
-     * Sets the value of the entityName property.
+     * Sets the value of the entityRegex property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setEntityName(String value) {
-        this.entityName = value;
+    public void setEntityRegex(String value) {
+        this.entityRegex = value;
     }
 
     /**
-     * Gets the value of the className property.
+     * Gets the value of the replaceExpression property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getClassName() {
-        return className;
+    public String getReplaceExpression() {
+        return replaceExpression;
     }
 
     /**
-     * Sets the value of the className property.
+     * Sets the value of the replaceExpression property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setClassName(String value) {
-        this.className = value;
+    public void setReplaceExpression(String value) {
+        this.replaceExpression = value;
     }
 
 }

@@ -23,42 +23,75 @@
 
     <xsd:complexType name="LQMGType">
       <xsd:sequence>
-        <xsd:element name="entity" type="tns:LQMGEntityType" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+        <xsd:element name="entities" type="tns:LQMGEntitiesType"></xsd:element>
       </xsd:sequence>
-      <xsd:attribute name="packageName" type="xsd:string" use="optional">
-        <xsd:annotation>
-          <xsd:documentation>Default name of the java package for the entities defined in this configuration file.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
       <xsd:attribute name="schemaName" type="xsd:string" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Default name of the schema where the entities (that are defined in this configuration) are searched.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+          <xsd:documentation>
+            Default name of the schema where the entities (that are defined in this configuration) are searched.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+        <xsd:attribute name="packageName" type="xsd:string" use="optional">
+        <xsd:annotation>
+          <xsd:documentation>
+            Default name of the java package for the entities defined in this configuration file.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="putSchemaIntoClass" type="xsd:boolean" use="optional" default="false"></xsd:attribute>
     </xsd:complexType>
 
     <xsd:complexType name="LQMGEntityType">
-      <xsd:attribute name="schemaName" type="xsd:string" use="optional">
-        <xsd:annotation>
-          <xsd:documentation>Name of the schema of the entity. If not defined, the rule will be applied to entities in any schema with the specified name.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
-      <xsd:attribute name="entityName" type="xsd:string" use="required">
-        <xsd:annotation>
-          <xsd:documentation>Name of the entity (table / view).</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
-      <xsd:attribute name="packageName" type="xsd:string" use="optional">
-        <xsd:annotation>
-          <xsd:documentation>Name of the java package where to the class should be genereted.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
-      <xsd:attribute name="className" type="xsd:string" use="optional">
-        <xsd:annotation>
-          <xsd:documentation>Name of the class that should be generated from the entity. If not defined, the default name will be used.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
-      <xsd:attribute name="putSchemaIntoClass" type="xsd:boolean" use="optional" default="false">
-        <xsd:annotation>
-          <xsd:documentation>Whether to put the name of the schema into the constructor of the metadata class or not.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
-      <xsd:attribute name="generate" type="xsd:boolean" use="optional" default="true">
-        <xsd:annotation>
-          <xsd:documentation>Whether to generate metadata class for this entity or not.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+      <xsd:complexContent>
+        <xsd:extension base="tns:LQMGAbstractEntityType">
+
+          <xsd:attribute name="entityName" type="xsd:string" use="required">
+            <xsd:annotation>
+              <xsd:documentation>Name of the entity (table / view).</xsd:documentation>
+            </xsd:annotation>
+          </xsd:attribute>
+
+
+          <xsd:attribute name="className" type="xsd:string" use="optional">
+            <xsd:annotation>
+              <xsd:documentation>
+                Name of the class that should be generated from the entity. If not defined, the default name will be
+                used.
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:attribute>
+
+
+
+        </xsd:extension>
+      </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="LQMGEntitiesType">
+      <xsd:sequence maxOccurs="unbounded">
+        <xsd:element name="entity" type="tns:LQMGEntityType"></xsd:element>
+        <xsd:element name="entitySet" type="tns:LQMGEntitySetType"></xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="LQMGEntitySetType">
+      <xsd:complexContent>
+        <xsd:extension base="tns:LQMGAbstractEntityType">
+
+          <xsd:attribute name="entityRegex" type="xsd:string" use="required"></xsd:attribute>
+
+          <xsd:attribute name="replaceExpression" type="xsd:string" use="optional"></xsd:attribute>
+
+
+
+        </xsd:extension>
+      </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="LQMGAbstractEntityType">
+      <xsd:attribute name="schemaName" type="xsd:string" use="optional"></xsd:attribute>
+      <xsd:attribute name="packageName" type="xsd:string" use="optional"></xsd:attribute>
+      <xsd:attribute name="putSchemaIntoMetadata" type="xsd:boolean" use="optional"></xsd:attribute>
     </xsd:complexType>
 </xsd:schema>

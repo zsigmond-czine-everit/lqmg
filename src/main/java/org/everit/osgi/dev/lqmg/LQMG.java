@@ -55,17 +55,11 @@ import com.mysema.query.sql.codegen.MetaDataExporter;
  */
 public class LQMG {
 
-    private static final String ARG_BUNDLES = "bundles";
-    private static final String ARG_PACKAGE_NAME = "packageName";
-    private static final String ARG_SCHEMA = "schema";
-
-    private static final String ARG_SCHEMA_TO_PACKAGE = "schemaToPackage";
-    private static final String ARG_TARGET_FOLDER = "targetFolder";
-
     public static final String CAPABILITY_ATTR_SCHEMA_NAME = "name";
     public static final String CAPABILITY_ATTR_SCHEMA_RESOURCE = "resource";
     public static final String CAPABILITY_LIQUIBASE_SCHEMA = "liquibase.schema";
-    public static final String CAPABILITY_QUERYDSL_PACKAGE = "querydsl.package";
+    public static final String CAPABILITY_LQMG_CONFIG_RESOURCE = "lqmg.config.resource";
+
     /**
      * The {@link Logger} instance for logging.
      */
@@ -102,12 +96,6 @@ public class LQMG {
         folder.delete();
     }
 
-    private static String evaluateArgValue(final String fullArg, final String argName) {
-        String result = fullArg.substring(("--" + argName + "=").length());
-        LOGGER.log(Level.INFO, "The " + argName + " argument: " + result);
-        return result;
-    }
-
     private static void exportMetaData(final GenerationProperties parameters,
             final Connection connection) throws SQLException {
         LOGGER.log(Level.INFO, "Start meta data export.");
@@ -134,7 +122,7 @@ public class LQMG {
             osgiContainer = LQMG.startOSGiContainer(parameters.getBundlePaths(), tempDirectory.getAbsolutePath());
 
             Map<Bundle, List<BundleCapability>> matchingBundles = LiquibaseOSGiUtil
-                    .findBundlesBySchemaExpression(parameters.getSchemaCapability(),
+                    .findBundlesBySchemaExpression(parameters.getCapability(),
                             osgiContainer.getBundleContext(), Bundle.RESOLVED);
 
             if (matchingBundles.size() == 0) {
@@ -143,7 +131,7 @@ public class LQMG {
             if (matchingBundles.size() > 1) {
                 LOGGER.log(Level.WARNING,
                         "Found multiple bundles containing matching capabilities for schema"
-                                + " expression: '" + parameters.getSchemaCapability()
+                                + " expression: '" + parameters.getCapability()
                                 + "'. Using the first one from list: "
                                 + matchingBundles.keySet().toString());
             }
@@ -198,99 +186,9 @@ public class LQMG {
             }
         }
 
-        throw new LiquiBaseQueryDSLModelGeneratorException(
+        throw new LQMGException(
                 "Could not find matching capability in any of the bundles for schema expression: "
-                        + parameters.getSchemaCapability(), null);
-    }
-
-    /**
-     * The command line processor.
-     * 
-     * @param args
-     *            the arguments.
-     */
-    public static void main(final String[] args) {
-        if ((args.length == 0)
-                || ((args.length == 1) && "--help".equals(args[0]))) {
-            LOGGER.log(Level.INFO, args.length != 1 ? "No arguments."
-                    : "Called the command help.");
-            LQMG.printHelp();
-            return;
-        }
-
-        String logicalFilePath = null;
-        String targetFolder = null;
-        String bundlesParam = null;
-
-        LOGGER.log(Level.INFO, "Processing arguments.");
-        for (String arg : args) {
-            if (arg.startsWith("--" + ARG_SCHEMA + "=")) {
-                logicalFilePath = LQMG.evaluateArgValue(arg,
-                        ARG_SCHEMA);
-            } else if (arg.startsWith("--" + ARG_BUNDLES + "=")) {
-                bundlesParam = LQMG.evaluateArgValue(arg, ARG_BUNDLES);
-            } else if (arg.startsWith("--" + ARG_TARGET_FOLDER + "=")) {
-                targetFolder = LQMG.evaluateArgValue(arg, ARG_TARGET_FOLDER);
-            } else {
-                LOGGER.log(Level.INFO, "Unknow parameter: "
-                        + arg + "'. Run <with --help to get information about the possible parameters");
-            }
-        }
-        LOGGER.log(Level.INFO, "Processed arguments.");
-
-        if (logicalFilePath == null) {
-            LOGGER.log(Level.SEVERE, "Missing required argument: "
-                    + ARG_SCHEMA);
-        }
-        if (targetFolder == null) {
-            LOGGER.log(Level.SEVERE, "Missing required argument: "
-                    + ARG_TARGET_FOLDER);
-        }
-        if (bundlesParam == null) {
-            LOGGER.log(Level.SEVERE, "Missing required argument: "
-                    + ARG_BUNDLES);
-        }
-        if ((logicalFilePath == null) || (targetFolder == null)
-                || (bundlesParam == null)) {
-            return;
-        }
-
-        GenerationProperties params = new GenerationProperties(logicalFilePath,
-                bundlesParam.split(";"), targetFolder);
-
-        LOGGER.log(Level.INFO, "Starting generate.");
-        LQMG.generate(params);
-        LOGGER.log(Level.INFO, "Ended generate.");
-    }
-
-    /**
-     * The printing the help note.
-     */
-    public static void printHelp() {
-        LOGGER.log(Level.INFO, "Print help note.");
-        System.out
-                .println("Example usage: lqmg.sh --schema=myApp --packageName=foo"
-                        + " --targetFolder=/tmp/generated\n");
-        System.out.println("Arguments: \n");
-        System.out
-                .println("  --"
-                        + ARG_SCHEMA
-                        + ": Name of the schema that is listed in the Provide-Capability of a bundle. "
-                        + "It is possible to define filter on the Capability as well.");
-        System.out
-                .println("  --"
-                        + ARG_BUNDLES
-                        + ": The path to the persistent bundles separated by semicolon");
-        System.out
-                .println("  --"
-                        + ARG_PACKAGE_NAME
-                        + ": The java package of the generated QueryDSL metamodel classes"
-                        + " (default: empty, that means that the package will be either empty or derived from the schema)");
-        System.out.println("  --" + ARG_TARGET_FOLDER
-                + ": The folder where source will be generated to");
-        System.out.println("  --" + ARG_SCHEMA_TO_PACKAGE
-                + ": the schema to package or not; (default: true)");
-        System.out.println("  --help: This help\n\n");
+                        + parameters.getCapability(), null);
     }
 
     private static Framework startOSGiContainer(final String[] bundlePaths, final String tempDirPath)
@@ -357,14 +255,14 @@ public class LQMG {
             // error to create connection.
             // error connection.getMetaData
             // error when export database.
-            throw new LiquiBaseQueryDSLModelGeneratorException(
+            throw new LQMGException(
                     "Error during try to connection the database.", e);
         } catch (LiquibaseException e) {
             // liquibase.update(null);
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new LiquiBaseQueryDSLModelGeneratorException(
+            throw new LQMGException(
                     "Error during processing XML file; "
-                            + parameters.getSchemaCapability(), e);
+                            + parameters.getCapability(), e);
         } finally {
             if (connection != null) {
                 try {
@@ -372,7 +270,7 @@ public class LQMG {
                     LOGGER.log(Level.INFO, "Connection closed.");
                 } catch (SQLException e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                    throw new LiquiBaseQueryDSLModelGeneratorException(
+                    throw new LQMGException(
                             "Closing the connection was unsuccessful.", e);
                 }
             }

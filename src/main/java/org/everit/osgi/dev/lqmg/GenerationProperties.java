@@ -21,27 +21,27 @@ package org.everit.osgi.dev.lqmg;
  */
 public class GenerationProperties {
 
-    public static enum Scope {
-        CAPABILITY, BUNDLE, ALL
-    }
-
     /**
      * The paths to the bundles (directory path of jar file path).
      */
     private final String[] bundlePaths;
 
     /**
-     * The scope of tables/views that should be generated.
-     */
-    private Scope scope = Scope.BUNDLE;
-
-    /**
      * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
      * userMgmt;filter:="(version=2)"
      */
-    private String schemaCapability;
+    private String capability;
 
-    private String lqmgConfigurationPath = null;
+    /**
+     * Optional path of a configuration XML. In case this configuration exists, the rules in it are stronger than the
+     * rules specified at the capability attributes in the bundles.
+     */
+    private String configurationPath;
+
+    /**
+     * Comma separated list of java packages that should be generated. Null means that all packages should be generated.
+     */
+    private String[] packages = new String[0];
 
     /**
      * The folder where source will be generated to.
@@ -65,36 +65,36 @@ public class GenerationProperties {
         return bundlePaths;
     }
 
+    public String getCapability() {
+        return capability;
+    }
+
+    public String getConfigurationPath() {
+        return configurationPath;
+    }
+
+    public String[] getPackages() {
+        return packages;
+    }
+
     public String getTargetFolder() {
         return targetFolder;
     }
 
+    public void setCapability(String schema) {
+        this.capability = schema;
+    }
+
+    public void setConfigurationPath(String configurationPath) {
+        this.configurationPath = configurationPath;
+    }
+
+    public void setPackages(String[] packages) {
+        this.packages = packages;
+    }
+
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
-    }
-
-    public Scope getScope() {
-        return scope;
-    }
-
-    public void setScope(Scope scope) {
-        this.scope = scope;
-    }
-
-    public String getSchemaCapability() {
-        return schemaCapability;
-    }
-
-    public void setSchemaCapability(String schemaCapability) {
-        this.schemaCapability = schemaCapability;
-    }
-
-    public String getLqmgConfigurationPath() {
-        return lqmgConfigurationPath;
-    }
-
-    public void setLqmgConfigurationPath(String lqmgConfigurationPath) {
-        this.lqmgConfigurationPath = lqmgConfigurationPath;
     }
 
 }

@@ -11,25 +11,22 @@ package org.everit.osgi.dev.lqmg.schema;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for LQMGType complex type.
+ * <p>Java class for LQMGAbstractEntityType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LQMGType">
+ * &lt;complexType name="LQMGAbstractEntityType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="entities" type="{http://everit.org/lqmg}LQMGEntitiesType"/>
- *       &lt;/sequence>
  *       &lt;attribute name="schemaName" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="packageName" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="putSchemaIntoClass" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
+ *       &lt;attribute name="putSchemaIntoMetadata" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -38,43 +35,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LQMGType", propOrder = {
-    "entities"
+@XmlType(name = "LQMGAbstractEntityType")
+@XmlSeeAlso({
+    LQMGEntitySetType.class,
+    LQMGEntityType.class
 })
-public class LQMGType {
+public class LQMGAbstractEntityType {
 
-    @XmlElement(required = true)
-    protected LQMGEntitiesType entities;
     @XmlAttribute(name = "schemaName")
     protected String schemaName;
     @XmlAttribute(name = "packageName")
     protected String packageName;
-    @XmlAttribute(name = "putSchemaIntoClass")
-    protected Boolean putSchemaIntoClass;
-
-    /**
-     * Gets the value of the entities property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LQMGEntitiesType }
-     *     
-     */
-    public LQMGEntitiesType getEntities() {
-        return entities;
-    }
-
-    /**
-     * Sets the value of the entities property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LQMGEntitiesType }
-     *     
-     */
-    public void setEntities(LQMGEntitiesType value) {
-        this.entities = value;
-    }
+    @XmlAttribute(name = "putSchemaIntoMetadata")
+    protected Boolean putSchemaIntoMetadata;
 
     /**
      * Gets the value of the schemaName property.
@@ -125,31 +98,27 @@ public class LQMGType {
     }
 
     /**
-     * Gets the value of the putSchemaIntoClass property.
+     * Gets the value of the putSchemaIntoMetadata property.
      * 
      * @return
      *     possible object is
      *     {@link Boolean }
      *     
      */
-    public boolean isPutSchemaIntoClass() {
-        if (putSchemaIntoClass == null) {
-            return false;
-        } else {
-            return putSchemaIntoClass;
-        }
+    public Boolean isPutSchemaIntoMetadata() {
+        return putSchemaIntoMetadata;
     }
 
     /**
-     * Sets the value of the putSchemaIntoClass property.
+     * Sets the value of the putSchemaIntoMetadata property.
      * 
      * @param value
      *     allowed object is
      *     {@link Boolean }
      *     
      */
-    public void setPutSchemaIntoClass(Boolean value) {
-        this.putSchemaIntoClass = value;
+    public void setPutSchemaIntoMetadata(Boolean value) {
+        this.putSchemaIntoMetadata = value;
     }
 
 }
