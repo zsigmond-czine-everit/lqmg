@@ -37,8 +37,8 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
 import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
-import org.everit.osgi.dev.lqmg.internal.LQMGNamingStrategy;
 import org.everit.osgi.dev.lqmg.internal.LQMGChangeExecListener;
+import org.everit.osgi.dev.lqmg.internal.LQMGNamingStrategy;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
 import org.h2.Driver;
@@ -102,7 +102,7 @@ public class LQMG {
             final Connection connection, ConfigurationContainer configContainer) throws SQLException {
         LOGGER.log(Level.INFO, "Start meta data export.");
         MetaDataExporter metaDataExporter = new MetaDataExporter();
-        metaDataExporter.setNamingStrategy(new LQMGNamingStrategy());
+        metaDataExporter.setNamingStrategy(new LQMGNamingStrategy(configContainer));
 
         metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
         metaDataExporter.export(connection.getMetaData());

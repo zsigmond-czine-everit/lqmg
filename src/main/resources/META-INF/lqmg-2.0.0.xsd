@@ -25,14 +25,14 @@
       <xsd:sequence>
         <xsd:element name="entities" type="tns:LQMGEntitiesType"></xsd:element>
       </xsd:sequence>
-      <xsd:attribute name="schemaName" type="xsd:string" use="optional">
+      <xsd:attribute name="defaultSchemaName" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>
             Default name of the schema where the entities (that are defined in this configuration) are searched.
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
-        <xsd:attribute name="packageName" type="xsd:string" use="optional">
+      <xsd:attribute name="defaultPackageName" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>
             Default name of the java package for the entities defined in this configuration file.
@@ -40,6 +40,8 @@
         </xsd:annotation>
       </xsd:attribute>
       <xsd:attribute name="putSchemaIntoClass" type="xsd:boolean" use="optional" default="false"></xsd:attribute>
+      <xsd:attribute name="defaultPrefix" type="xsd:string" default="Q" use="optional"></xsd:attribute>
+      <xsd:attribute name="defaultSuffix" type="xsd:string" use="optional"></xsd:attribute>
     </xsd:complexType>
 
     <xsd:complexType name="LQMGEntityType">
@@ -79,13 +81,13 @@
       <xsd:complexContent>
         <xsd:extension base="tns:LQMGAbstractEntityType">
 
-          <xsd:attribute name="entityRegex" type="xsd:string" use="required"></xsd:attribute>
-
-          <xsd:attribute name="replaceExpression" type="xsd:string" use="optional"></xsd:attribute>
+          <xsd:attribute name="entityNameRegex" type="xsd:string" use="required"></xsd:attribute>
 
 
 
-        </xsd:extension>
+
+                <xsd:attribute name="simpleEntityNameExpression" type="xsd:string" use="optional"></xsd:attribute>
+            </xsd:extension>
       </xsd:complexContent>
     </xsd:complexType>
     
@@ -93,5 +95,7 @@
       <xsd:attribute name="schemaName" type="xsd:string" use="optional"></xsd:attribute>
       <xsd:attribute name="packageName" type="xsd:string" use="optional"></xsd:attribute>
       <xsd:attribute name="putSchemaIntoMetadata" type="xsd:boolean" use="optional"></xsd:attribute>
+      <xsd:attribute name="prefix" type="xsd:string" use="optional"></xsd:attribute>
+      <xsd:attribute name="suffix" type="xsd:string" use="optional"></xsd:attribute>
     </xsd:complexType>
 </xsd:schema>

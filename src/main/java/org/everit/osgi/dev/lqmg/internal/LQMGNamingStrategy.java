@@ -23,6 +23,13 @@ import com.mysema.query.sql.codegen.DefaultNamingStrategy;
  */
 public class LQMGNamingStrategy extends DefaultNamingStrategy {
 
+    private final ConfigurationContainer configContainer;
+
+    public LQMGNamingStrategy(ConfigurationContainer configContainer) {
+        super();
+        this.configContainer = configContainer;
+    }
+
     @Override
     public String appendSchema(final String packageName, final String schemaName) {
         String result = super.appendSchema(packageName, schemaName);
@@ -32,4 +39,9 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
         return result;
     }
 
+    @Override
+    public String getClassName(String tableName) {
+        // TODO check configuration and convert
+        return super.getClassName(tableName);
+    }
 }

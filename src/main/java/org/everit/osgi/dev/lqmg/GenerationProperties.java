@@ -40,6 +40,7 @@ public class GenerationProperties {
 
     /**
      * Comma separated list of java packages that should be generated. Null means that all packages should be generated.
+     * Classes for tables coming from Liquibase (changelog and lock tables) are never generated.
      */
     private String[] packages = new String[0];
 
