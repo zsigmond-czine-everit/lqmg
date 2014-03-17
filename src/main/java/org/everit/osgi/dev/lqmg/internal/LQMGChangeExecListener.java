@@ -57,7 +57,7 @@ public class LQMGChangeExecListener implements ChangeExecListener {
 
         String configPath = (String) attributes.get(LQMG.CAPABILITY_LQMG_CONFIG_RESOURCE);
         if (configPath != null) {
-            configurationContainer.addConfiguration(bundle, configPath);
+            configurationContainer.addConfiguration(new ConfigPath(bundle, configPath));
         }
     }
 

@@ -36,7 +36,9 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
-import org.everit.osgi.dev.lqmg.internal.CustomNamingStrategy;
+import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
+import org.everit.osgi.dev.lqmg.internal.LQMGNamingStrategy;
+import org.everit.osgi.dev.lqmg.internal.LQMGChangeExecListener;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
 import org.h2.Driver;
@@ -97,10 +99,10 @@ public class LQMG {
     }
 
     private static void exportMetaData(final GenerationProperties parameters,
-            final Connection connection) throws SQLException {
+            final Connection connection, ConfigurationContainer configContainer) throws SQLException {
         LOGGER.log(Level.INFO, "Start meta data export.");
         MetaDataExporter metaDataExporter = new MetaDataExporter();
-        metaDataExporter.setNamingStrategy(new CustomNamingStrategy());
+        metaDataExporter.setNamingStrategy(new LQMGNamingStrategy());
 
         metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
         metaDataExporter.export(connection.getMetaData());
@@ -114,7 +116,6 @@ public class LQMG {
      *            the parameters for the generation. See more {@link GenerationProperties}.
      */
     public static void generate(final GenerationProperties parameters) {
-
         Framework osgiContainer = null;
         File tempDirectory = null;
         try {
@@ -246,10 +247,14 @@ public class LQMG {
             String schemaResource = (String) attributes.get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
             Liquibase liquibase = new Liquibase(schemaResource, resourceAccessor, database);
 
+            ConfigurationContainer configContainer = new ConfigurationContainer();
+            LQMGChangeExecListener lqmgChangeExecListener = new LQMGChangeExecListener(configContainer);
+            liquibase.setChangeExecListener(lqmgChangeExecListener);
+
             liquibase.update((String) null);
             LOGGER.log(Level.INFO, "Finish LiquiBase and update.");
 
-            LQMG.exportMetaData(parameters, connection);
+            LQMG.exportMetaData(parameters, connection, configContainer);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             // error to create connection.

@@ -51,14 +51,15 @@ public class GenerationProperties {
     /**
      * The simple constructor.
      * 
-     * @param topSchema
+     * @param capability
      *            A schema name with optional capability filter where liquibase should start searching for changesets.
      * @param targetFolder
      *            the folder where source will be generated to.
      */
-    public GenerationProperties(final String topSchema, final String[] bundlePaths, final String targetFolder) {
+    public GenerationProperties(final String capability, final String[] bundlePaths, final String targetFolder) {
         this.targetFolder = targetFolder;
         this.bundlePaths = bundlePaths;
+        this.capability = capability;
     }
 
     public String[] getBundlePaths() {

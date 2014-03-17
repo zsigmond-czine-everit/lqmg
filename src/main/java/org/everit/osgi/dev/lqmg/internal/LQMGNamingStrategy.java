@@ -21,7 +21,7 @@ import com.mysema.query.sql.codegen.DefaultNamingStrategy;
 /**
  * This class defines custom conversion strategy from table to class and column to property names.
  */
-public class CustomNamingStrategy extends DefaultNamingStrategy {
+public class LQMGNamingStrategy extends DefaultNamingStrategy {
 
     @Override
     public String appendSchema(final String packageName, final String schemaName) {
@@ -31,4 +31,5 @@ public class CustomNamingStrategy extends DefaultNamingStrategy {
         }
         return result;
     }
+
 }

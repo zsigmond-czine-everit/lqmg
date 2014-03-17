@@ -70,8 +70,8 @@
     
     <xsd:complexType name="LQMGEntitiesType">
       <xsd:sequence maxOccurs="unbounded">
-        <xsd:element name="entity" type="tns:LQMGEntityType"></xsd:element>
-        <xsd:element name="entitySet" type="tns:LQMGEntitySetType"></xsd:element>
+        <xsd:element name="entity" type="tns:LQMGEntityType" minOccurs="0"></xsd:element>
+        <xsd:element name="entitySet" type="tns:LQMGEntitySetType" minOccurs="0"></xsd:element>
       </xsd:sequence>
     </xsd:complexType>
 

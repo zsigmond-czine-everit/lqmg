@@ -26,7 +26,7 @@
   <include file="eosgi:carandperson" relativeToChangelogFile="false" />
 
   <changeSet id="1" author="everit">
-    <createTable tableName="car_registration" remarks="">
+    <createTable tableName="car_registration">
       <column name="car_registration_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false" />
       </column>

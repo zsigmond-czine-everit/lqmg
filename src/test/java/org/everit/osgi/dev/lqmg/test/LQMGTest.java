@@ -146,48 +146,48 @@ public class LQMGTest {
         }
     }
 
-    /**
-     * Testing the command line processor with various attributes.
-     */
-    @Test
-    public void testMainArguments() {
-        String tmpDirProperty = "java.io.tmpdir";
-        String tmpDir = System.getProperty(tmpDirProperty);
-        if (tmpDir == null) {
-            Assert.fail("User temp directory could not be retrieved");
-        }
-
-        UUID uuid = UUID.randomUUID();
-        File tmpDirFile = new File(tmpDir);
-        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
-
-        ClassLoader classLoader = LQMGTest.class.getClassLoader();
-        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
-        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
-
-        String externalForm = bundle1URL.toExternalForm();
-        String externalForm2 = bundle2URL.toExternalForm();
-
-        try {
-            String[] strings = {};
-            LQMG.main(strings);
-            strings = new String[] { "--help" };
-            LQMG.main(strings);
-            strings = new String[] { "--nincsilyen=valami" };
-            LQMG.main(strings);
-            strings = new String[] { "--schema=myApp", "--targetFolder=/tmp/generated" };
-            LQMG.main(strings);
-            strings = new String[] { "--schema=myApp", "--bundles=" + externalForm };
-            LQMG.main(strings);
-            strings = new String[] { "--schema=myApp", "--bundles=" + externalForm + ';' + externalForm2,
-                    "--targetFolder=/tmp/generated" };
-            LQMG.main(strings);
-            strings = new String[] { "--schema=myApp", "--bundles=" + externalForm + ';' + externalForm2,
-                    "--packageName=foo", "--targetFolder=/tmp/generated", "--schemaToPackage=false",
-                    "--schemaPattern=liquibase.schema" };
-            LQMG.main(strings);
-        } finally {
-            LQMGTest.deleteFolder(testDirFile);
-        }
-    }
+    // /**
+    // * Testing the command line processor with various attributes.
+    // */
+    // @Test
+    // public void testMainArguments() {
+    // String tmpDirProperty = "java.io.tmpdir";
+    // String tmpDir = System.getProperty(tmpDirProperty);
+    // if (tmpDir == null) {
+    // Assert.fail("User temp directory could not be retrieved");
+    // }
+    //
+    // UUID uuid = UUID.randomUUID();
+    // File tmpDirFile = new File(tmpDir);
+    // File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+    //
+    // ClassLoader classLoader = LQMGTest.class.getClassLoader();
+    // URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+    // URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+    //
+    // String externalForm = bundle1URL.toExternalForm();
+    // String externalForm2 = bundle2URL.toExternalForm();
+    //
+    // try {
+    // String[] strings = {};
+    // LQMG.main(strings);
+    // strings = new String[] { "--help" };
+    // LQMG.main(strings);
+    // strings = new String[] { "--nincsilyen=valami" };
+    // LQMG.main(strings);
+    // strings = new String[] { "--schema=myApp", "--targetFolder=/tmp/generated" };
+    // LQMG.main(strings);
+    // strings = new String[] { "--schema=myApp", "--bundles=" + externalForm };
+    // LQMG.main(strings);
+    // strings = new String[] { "--schema=myApp", "--bundles=" + externalForm + ';' + externalForm2,
+    // "--targetFolder=/tmp/generated" };
+    // LQMG.main(strings);
+    // strings = new String[] { "--schema=myApp", "--bundles=" + externalForm + ';' + externalForm2,
+    // "--packageName=foo", "--targetFolder=/tmp/generated", "--schemaToPackage=false",
+    // "--schemaPattern=liquibase.schema" };
+    // LQMG.main(strings);
+    // } finally {
+    // LQMGTest.deleteFolder(testDirFile);
+    // }
+    // }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lqmg xmlns="http://everit.org/lqmg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" putSchemaIntoClass="false">
+  <entities>
+    <entity entityName="car" className="QCarTest" packageName="myPackage" />
+  </entities>
+</lqmg>

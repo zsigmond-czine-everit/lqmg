@@ -2,10 +2,13 @@ package org.everit.osgi.dev.lqmg.internal;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
@@ -31,12 +34,19 @@ public class ConfigurationContainer {
 
             Bundle bundle = configValue.getBundle();
             if (bundle != null) {
-                sb.append("Bundle: ").append(bundle.toString()).append("; ");
+                sb.append("  Bundle: ").append(bundle.toString()).append("; ");
             }
-            sb.append("Path: ").append(configValue.getConfigurationXMLPath());
+            sb.append("Path: ").append(configValue.getConfigurationXMLPath()).append("\n");
+
+            Bundle existingValueBundle = existingValue.getBundle();
+            if (existingValueBundle != null) {
+                sb.append("  Bundle: ").append(existingValueBundle.toString()).append("; ");
+            }
+            sb.append("Path: ").append(existingValue.getConfigurationXMLPath());
 
             throw new LQMGException(sb.toString(), null);
         }
+        configMap.put(configKey, configValue);
     }
 
     private final Map<ConfigKey, ConfigValue<LQMGEntityType>> entityConfigs =
@@ -53,20 +63,33 @@ public class ConfigurationContainer {
     private final Map<ConfigKey, ConfigValue<LQMGEntitySetType>> mainEntitySetConfigs =
             new HashMap<ConfigKey, ConfigValue<LQMGEntitySetType>>();
 
+    private final Set<ConfigPath> processedConfigs = new HashSet<ConfigPath>();
+
     public ConfigurationContainer() {
         try {
-            this.jaxbContext = JAXBContext.newInstance("", this.getClass().getClassLoader());
+            this.jaxbContext = JAXBContext.newInstance(LQMGType.class.getPackage().getName(), this.getClass()
+                    .getClassLoader());
         } catch (JAXBException e) {
             throw new LQMGException("Could not create JAXBContext for configuration", e);
         }
     }
 
-    public void addConfiguration(Bundle bundle, String path) {
+    public void addConfiguration(ConfigPath configPath) {
+        if (!processedConfigs.add(configPath)) {
+            // If the config file is already processed, just return
+            return;
+        }
+        Bundle bundle = configPath.getBundle();
+        String resource = configPath.getResource();
         BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
         ClassLoader classLoader = bundleWiring.getClassLoader();
-        URL configurationURL = classLoader.getResource(path);
+        URL configurationURL = classLoader.getResource(resource);
+        if (configurationURL == null) {
+            throw new LQMGException("Configuration file not found on the specified path '" + resource + "' in bundle "
+                    + bundle.toString(), null);
+        }
         LQMGType lqmgType = unmarshalConfiguration(configurationURL);
-        processLQMGType(lqmgType, path, bundle);
+        processLQMGType(lqmgType, resource, bundle);
     }
 
     private void processLQMGType(LQMGType lqmgType, String xmlConfigurationPath, Bundle bundle) {
@@ -97,7 +120,21 @@ public class ConfigurationContainer {
                             bundle, xmlConfigurationPath);
 
                     if (bundle == null) {
+                        addValueToConfigMap(configKey, configValue, mainEntityConfigs);
+                    } else {
+                        addValueToConfigMap(configKey, configValue, entityConfigs);
+                    }
+                } else {
+                    LQMGEntitySetType lqmgEntitySet = (LQMGEntitySetType) lqmgAbstractEntity;
+                    ConfigKey configKey = new ConfigKey(lqmgEntitySet.getSchemaName(),
+                            lqmgEntitySet.getEntityRegex());
+                    ConfigValue<LQMGEntitySetType> configValue = new ConfigValue<LQMGEntitySetType>(lqmgEntitySet,
+                            bundle, xmlConfigurationPath);
 
+                    if (bundle == null) {
+                        addValueToConfigMap(configKey, configValue, mainEntitySetConfigs);
+                    } else {
+                        addValueToConfigMap(configKey, configValue, entitySetConfigs);
                     }
                 }
             }
@@ -108,7 +145,10 @@ public class ConfigurationContainer {
         Unmarshaller unmarshaller;
         try {
             unmarshaller = jaxbContext.createUnmarshaller();
-            return (LQMGType) unmarshaller.unmarshal(configurationURL);
+
+            @SuppressWarnings("unchecked")
+            JAXBElement<LQMGType> rootElement = (JAXBElement<LQMGType>) unmarshaller.unmarshal(configurationURL);
+            return rootElement.getValue();
         } catch (JAXBException e) {
             throw new LQMGException("Could not unmarshal LQMG configuration: " + configurationURL.toExternalForm(), e);
         }
