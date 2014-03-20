@@ -31,17 +31,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for LQMGEntityType complex type.
+ * <p>Java class for LQMGNamingRuleType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LQMGEntityType">
+ * &lt;complexType name="LQMGNamingRuleType">
  *   &lt;complexContent>
  *     &lt;extension base="{http://everit.org/lqmg}LQMGAbstractEntityType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="class" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="regex" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="target" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -51,65 +51,65 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LQMGEntityType", propOrder = {
-    "name",
-    "clazz"
+@XmlType(name = "LQMGNamingRuleType", propOrder = {
+    "regex",
+    "target"
 })
-public class LQMGEntityType
+public class LQMGNamingRuleType
     extends LQMGAbstractEntityType
 {
 
     @XmlElement(required = true)
-    protected String name;
-    @XmlElement(name = "class", required = true)
-    protected String clazz;
+    protected String regex;
+    @XmlElement(required = true)
+    protected String target;
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the regex property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getName() {
-        return name;
+    public String getRegex() {
+        return regex;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the regex property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setName(String value) {
-        this.name = value;
+    public void setRegex(String value) {
+        this.regex = value;
     }
 
     /**
-     * Gets the value of the clazz property.
+     * Gets the value of the target property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getClazz() {
-        return clazz;
+    public String getTarget() {
+        return target;
     }
 
     /**
-     * Sets the value of the clazz property.
+     * Sets the value of the target property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setClazz(String value) {
-        this.clazz = value;
+    public void setTarget(String value) {
+        this.target = value;
     }
 
 }

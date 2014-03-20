@@ -31,8 +31,8 @@ import javax.xml.bind.Unmarshaller;
 import org.everit.osgi.dev.lqmg.LQMGException;
 import org.everit.osgi.dev.lqmg.schema.LQMGAbstractEntityType;
 import org.everit.osgi.dev.lqmg.schema.LQMGEntitiesType;
-import org.everit.osgi.dev.lqmg.schema.LQMGEntitySetType;
 import org.everit.osgi.dev.lqmg.schema.LQMGEntityType;
+import org.everit.osgi.dev.lqmg.schema.LQMGNamingRuleType;
 import org.everit.osgi.dev.lqmg.schema.LQMGType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -68,16 +68,16 @@ public class ConfigurationContainer {
     private final Map<ConfigKey, ConfigValue<LQMGEntityType>> entityConfigs =
             new HashMap<ConfigKey, ConfigValue<LQMGEntityType>>();
 
-    private final Map<ConfigKey, ConfigValue<LQMGEntitySetType>> entitySetConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGEntitySetType>>();
+    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> entitySetConfigs =
+            new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
 
     private final JAXBContext jaxbContext;
 
     private final Map<ConfigKey, ConfigValue<LQMGEntityType>> mainEntityConfigs =
             new HashMap<ConfigKey, ConfigValue<LQMGEntityType>>();
 
-    private final Map<ConfigKey, ConfigValue<LQMGEntitySetType>> mainEntitySetConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGEntitySetType>>();
+    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> mainEntitySetConfigs =
+            new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
 
     private final Set<ConfigPath> processedConfigs = new HashSet<ConfigPath>();
 
@@ -109,29 +109,29 @@ public class ConfigurationContainer {
     }
 
     private void processLQMGType(LQMGType lqmgType, String xmlConfigurationPath, Bundle bundle) {
-        String defaultPackageName = lqmgType.getDefaultPackageName();
-        String defaultSchemaName = lqmgType.getDefaultSchemaName();
+        String defaultPackageName = lqmgType.getDefaultPackage();
+        String defaultSchemaName = lqmgType.getDefaultSchema();
 
         LQMGEntitiesType entities = lqmgType.getEntities();
         if (entities != null) {
-            List<LQMGAbstractEntityType> entityAndEntitySet = entities.getEntityAndEntitySet();
+            List<LQMGAbstractEntityType> entityAndEntitySet = entities.getEntityAndNamingRule();
             for (LQMGAbstractEntityType lqmgAbstractEntity : entityAndEntitySet) {
-                if (lqmgAbstractEntity.getPackageName() == null) {
-                    lqmgAbstractEntity.setPackageName(defaultPackageName);
+                if (lqmgAbstractEntity.getPackage() == null) {
+                    lqmgAbstractEntity.setPackage(defaultPackageName);
                 }
 
-                if (lqmgAbstractEntity.getSchemaName() == null) {
-                    lqmgAbstractEntity.setSchemaName(defaultSchemaName);
+                if (lqmgAbstractEntity.getSchema() == null) {
+                    lqmgAbstractEntity.setSchema(defaultSchemaName);
                 }
 
-                if (lqmgAbstractEntity.isPutSchemaIntoMetadata() == null) {
-                    lqmgAbstractEntity.setPutSchemaIntoMetadata(lqmgType.isPutSchemaIntoClass());
+                if (lqmgAbstractEntity.isUseSchema() == null) {
+                    lqmgAbstractEntity.setUseSchema(lqmgType.isDefaultUseSchema());
                 }
 
                 if (lqmgAbstractEntity instanceof LQMGEntityType) {
                     LQMGEntityType lqmgEntity = (LQMGEntityType) lqmgAbstractEntity;
-                    ConfigKey configKey = new ConfigKey(lqmgEntity.getSchemaName(),
-                            lqmgEntity.getEntityName());
+                    ConfigKey configKey = new ConfigKey(lqmgEntity.getSchema(),
+                            lqmgEntity.getName());
                     ConfigValue<LQMGEntityType> configValue = new ConfigValue<LQMGEntityType>(lqmgEntity,
                             bundle, xmlConfigurationPath);
 
@@ -141,10 +141,10 @@ public class ConfigurationContainer {
                         addValueToConfigMap(configKey, configValue, entityConfigs);
                     }
                 } else {
-                    LQMGEntitySetType lqmgEntitySet = (LQMGEntitySetType) lqmgAbstractEntity;
-                    ConfigKey configKey = new ConfigKey(lqmgEntitySet.getSchemaName(),
-                            lqmgEntitySet.getEntityNameRegex());
-                    ConfigValue<LQMGEntitySetType> configValue = new ConfigValue<LQMGEntitySetType>(lqmgEntitySet,
+                    LQMGNamingRuleType lqmgEntitySet = (LQMGNamingRuleType) lqmgAbstractEntity;
+                    ConfigKey configKey = new ConfigKey(lqmgEntitySet.getSchema(),
+                            lqmgEntitySet.getRegex());
+                    ConfigValue<LQMGNamingRuleType> configValue = new ConfigValue<LQMGNamingRuleType>(lqmgEntitySet,
                             bundle, xmlConfigurationPath);
 
                     if (bundle == null) {
