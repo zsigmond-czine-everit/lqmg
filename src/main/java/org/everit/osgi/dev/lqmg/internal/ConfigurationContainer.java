@@ -21,7 +21,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -39,45 +42,32 @@ import org.osgi.framework.wiring.BundleWiring;
 
 public class ConfigurationContainer {
 
-    private static <T extends LQMGAbstractEntityType> void addValueToConfigMap(ConfigKey configKey,
-            ConfigValue<T> configValue,
-            Map<ConfigKey, ConfigValue<T>> configMap) {
+    private static class NullConfigValue extends ConfigValue<LQMGAbstractEntityType> {
 
-        ConfigValue<T> existingValue = configMap.get(configKey);
-        if (existingValue != null) {
-            StringBuilder sb = new StringBuilder("Configuration is defined more than once: ").append(
-                    configKey.toString()).append("\n");
-
-            Bundle bundle = configValue.getBundle();
-            if (bundle != null) {
-                sb.append("  Bundle: ").append(bundle.toString()).append("; ");
-            }
-            sb.append("Path: ").append(configValue.getConfigurationXMLPath()).append("\n");
-
-            Bundle existingValueBundle = existingValue.getBundle();
-            if (existingValueBundle != null) {
-                sb.append("  Bundle: ").append(existingValueBundle.toString()).append("; ");
-            }
-            sb.append("Path: ").append(existingValue.getConfigurationXMLPath());
-
-            throw new LQMGException(sb.toString(), null);
+        public NullConfigValue() {
+            super(null, null, null);
         }
-        configMap.put(configKey, configValue);
+
     }
+
+    private final Map<ConfigKey, ConfigValue<? extends LQMGAbstractEntityType>> cache =
+            new HashMap<ConfigKey, ConfigValue<? extends LQMGAbstractEntityType>>();
 
     private final Map<ConfigKey, ConfigValue<LQMGEntityType>> entityConfigs =
             new HashMap<ConfigKey, ConfigValue<LQMGEntityType>>();
-
-    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> entitySetConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
 
     private final JAXBContext jaxbContext;
 
     private final Map<ConfigKey, ConfigValue<LQMGEntityType>> mainEntityConfigs =
             new HashMap<ConfigKey, ConfigValue<LQMGEntityType>>();
 
-    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> mainEntitySetConfigs =
+    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> mainNamingRuleConfigs =
             new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
+
+    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> namingRuleConfigs =
+            new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
+
+    private final Map<String, Pattern> patternsByRegex = new HashMap<String, Pattern>();
 
     private final Set<ConfigPath> processedConfigs = new HashSet<ConfigPath>();
 
@@ -106,6 +96,98 @@ public class ConfigurationContainer {
         }
         LQMGType lqmgType = unmarshalConfiguration(configurationURL);
         processLQMGType(lqmgType, resource, bundle);
+    }
+
+    private <T extends LQMGAbstractEntityType> void addValueToConfigMap(ConfigKey configKey,
+            ConfigValue<T> configValue,
+            Map<ConfigKey, ConfigValue<T>> configMap) {
+
+        ConfigValue<? extends LQMGAbstractEntityType> cachedValue = cache.get(configKey);
+        if (cachedValue != null) {
+            cache.remove(configKey);
+        }
+
+        ConfigValue<T> existingValue = configMap.get(configKey);
+        if (existingValue != null) {
+            StringBuilder sb = new StringBuilder("Configuration is defined more than once: ").append(
+                    configKey.toString()).append("\n");
+
+            Bundle bundle = configValue.getBundle();
+            if (bundle != null) {
+                sb.append("  Bundle: ").append(bundle.toString()).append("; ");
+            }
+            sb.append("Path: ").append(configValue.getConfigurationXMLPath()).append("\n");
+
+            Bundle existingValueBundle = existingValue.getBundle();
+            if (existingValueBundle != null) {
+                sb.append("  Bundle: ").append(existingValueBundle.toString()).append("; ");
+            }
+            sb.append("Path: ").append(existingValue.getConfigurationXMLPath());
+
+            throw new LQMGException(sb.toString(), null);
+        }
+        configMap.put(configKey, configValue);
+    }
+
+    public LQMGAbstractEntityType findConfigForKey(ConfigKey key) {
+        ConfigValue<? extends LQMGAbstractEntityType> configValue = cache.get(key);
+        if (configValue != null) {
+            if (configValue instanceof NullConfigValue) {
+                return null;
+            } else {
+                return configValue.getEntityConfiguration();
+            }
+        }
+
+        configValue = findEntityConfigInMap(key, mainEntityConfigs);
+        if (configValue != null) {
+            return configValue.getEntityConfiguration();
+        }
+
+        return null;
+    }
+
+    private ConfigValue<LQMGEntityType> findEntityConfigInMap(final ConfigKey key,
+            final Map<ConfigKey, ConfigValue<LQMGEntityType>> map) {
+
+        ConfigValue<LQMGEntityType> configValue = map.get(key);
+        if (configValue != null) {
+            return configValue;
+        }
+        if (key.getSchemaName() != null) {
+            ConfigKey nullSchemaConfigKey = new ConfigKey(null, key.getEntity());
+            return map.get(nullSchemaConfigKey);
+        }
+        return null;
+    }
+
+    private ConfigValue<LQMGNamingRuleType> findNamingRuleInMap(final ConfigKey key,
+            final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> map) {
+
+        String entityName = key.getEntity();
+
+        if (key.getSchemaName() != null) {
+            String schemaName = key.getSchemaName();
+            for (Entry<ConfigKey, ConfigValue<LQMGNamingRuleType>> entry : map.entrySet()) {
+                ConfigKey entryKey = entry.getKey();
+                if (schemaName.equals(entryKey.getSchemaName())) {
+
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private boolean matches(String regex, String value) {
+        Pattern pattern = patternsByRegex.get(regex);
+        if (pattern == null) {
+            pattern = Pattern.compile(regex);
+            patternsByRegex.put(regex, pattern);
+        }
+        Matcher matcher = pattern.matcher(value);
+        // TODO
+        return matcher.matches();
     }
 
     private void processLQMGType(LQMGType lqmgType, String xmlConfigurationPath, Bundle bundle) {
@@ -148,9 +230,9 @@ public class ConfigurationContainer {
                             bundle, xmlConfigurationPath);
 
                     if (bundle == null) {
-                        addValueToConfigMap(configKey, configValue, mainEntitySetConfigs);
+                        addValueToConfigMap(configKey, configValue, mainNamingRuleConfigs);
                     } else {
-                        addValueToConfigMap(configKey, configValue, entitySetConfigs);
+                        addValueToConfigMap(configKey, configValue, namingRuleConfigs);
                     }
                 }
             }

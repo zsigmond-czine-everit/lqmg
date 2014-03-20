@@ -26,7 +26,6 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
     private final ConfigurationContainer configContainer;
 
     public LQMGNamingStrategy(ConfigurationContainer configContainer) {
-        super();
         this.configContainer = configContainer;
     }
 
