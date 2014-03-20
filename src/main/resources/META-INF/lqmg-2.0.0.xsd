@@ -26,7 +26,7 @@
 
     <xsd:complexType name="LQMGType">
       <xsd:sequence>
-        <xsd:element name="entities" type="tns:LQMGEntitiesType" minOccurs="1" maxOccurs="1"></xsd:element>
+        <xsd:element name="namingRules" type="tns:NamingRulesType" minOccurs="1" maxOccurs="1"></xsd:element>
       </xsd:sequence>
       <xsd:attribute name="defaultSchema" type="xsd:string" use="optional">
         <xsd:annotation>
@@ -52,19 +52,23 @@
         </xsd:annotation></xsd:attribute>
     </xsd:complexType>
 
-    <xsd:complexType name="LQMGEntityType">
+    <xsd:complexType name="ClassNameRuleType">
       <xsd:complexContent>
-        <xsd:extension base="tns:LQMGAbstractEntityType">
+        <xsd:extension base="tns:AbstractNamingRuleType">
 
           <xsd:sequence>
-            <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1">
+            <xsd:element name="entity" type="xsd:string" minOccurs="1" maxOccurs="1">
               <xsd:annotation>
                 <xsd:documentation>Exact name of the entity that this rull will be applied to.</xsd:documentation>
-              </xsd:annotation></xsd:element>
+              </xsd:annotation>
+            </xsd:element>
             <xsd:element name="class" type="xsd:string" minOccurs="1" maxOccurs="1">
               <xsd:annotation>
-                <xsd:documentation>The name of the generated class. Specified Prefix and suffix will be added to this class name.</xsd:documentation>
-              </xsd:annotation></xsd:element>
+                <xsd:documentation>
+                  The name of the generated class. Specified Prefix and suffix will be added to this class name.
+                </xsd:documentation>
+              </xsd:annotation>
+            </xsd:element>
           </xsd:sequence>
 
 
@@ -75,31 +79,31 @@
       </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="LQMGEntitiesType">
+    <xsd:complexType name="NamingRulesType">
       <xsd:sequence maxOccurs="unbounded">
-        <xsd:element name="entity" type="tns:LQMGEntityType" minOccurs="0">
+        <xsd:element name="classNameRule" type="tns:ClassNameRuleType" minOccurs="0">
           <xsd:annotation>
             <xsd:documentation>Definition that says the class name of an entity (table / view), </xsd:documentation>
           </xsd:annotation></xsd:element>
-        <xsd:element name="namingRule" type="tns:LQMGNamingRuleType" minOccurs="0">
+        <xsd:element name="regexRule" type="tns:RegexRuleType" minOccurs="0">
           <xsd:annotation>
             <xsd:documentation>Rule how to temprary rename an entity before generting class name from it.</xsd:documentation>
           </xsd:annotation></xsd:element>
       </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:complexType name="LQMGNamingRuleType">
+    <xsd:complexType name="RegexRuleType">
       <xsd:complexContent>
-        <xsd:extension base="tns:LQMGAbstractEntityType">
+        <xsd:extension base="tns:AbstractNamingRuleType">
 
           <xsd:sequence>
             <xsd:element name="regex" type="xsd:string" maxOccurs="1" minOccurs="1">
               <xsd:annotation>
                 <xsd:documentation>Regular expression that must match the entity name.</xsd:documentation>
               </xsd:annotation></xsd:element>
-            <xsd:element name="target" type="xsd:string" maxOccurs="1" minOccurs="1">
+            <xsd:element name="replacement" type="xsd:string" maxOccurs="1" minOccurs="1">
               <xsd:annotation>
-                <xsd:documentation>The target entity name which should be used to generate the class name. Groups from the regular expression may be used with $ character.</xsd:documentation>
+                <xsd:documentation>The replacement expression that translates the entity name that is the base of the class name generation. To get information about the syntax of the replacement expression, see the documentation of javax.util.regex.Matcher.replaceAll(String) function.</xsd:documentation>
               </xsd:annotation></xsd:element>
           </xsd:sequence>
 
@@ -110,7 +114,7 @@
       </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="LQMGAbstractEntityType">
+    <xsd:complexType name="AbstractNamingRuleType">
       <xsd:attribute name="schema" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>If schema name is defined, the rule will be applied only on entities that are coming from the specified schema. If there is a default schema specified, an empty string can define that there is no schema filter on this rule.</xsd:documentation>

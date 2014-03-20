@@ -32,17 +32,17 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.dev.lqmg.schema.LQMGAbstractEntityType;
-import org.everit.osgi.dev.lqmg.schema.LQMGEntitiesType;
-import org.everit.osgi.dev.lqmg.schema.LQMGEntityType;
-import org.everit.osgi.dev.lqmg.schema.LQMGNamingRuleType;
+import org.everit.osgi.dev.lqmg.schema.AbstractNamingRuleType;
+import org.everit.osgi.dev.lqmg.schema.ClassNameRuleType;
 import org.everit.osgi.dev.lqmg.schema.LQMGType;
+import org.everit.osgi.dev.lqmg.schema.NamingRulesType;
+import org.everit.osgi.dev.lqmg.schema.RegexRuleType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class ConfigurationContainer {
 
-    private static class NullConfigValue extends ConfigValue<LQMGAbstractEntityType> {
+    private static class NullConfigValue extends ConfigValue<AbstractNamingRuleType> {
 
         public NullConfigValue() {
             super(null, null, null);
@@ -50,22 +50,22 @@ public class ConfigurationContainer {
 
     }
 
-    private final Map<ConfigKey, ConfigValue<? extends LQMGAbstractEntityType>> cache =
-            new HashMap<ConfigKey, ConfigValue<? extends LQMGAbstractEntityType>>();
+    private final Map<ConfigKey, ConfigValue<? extends AbstractNamingRuleType>> cache =
+            new HashMap<ConfigKey, ConfigValue<? extends AbstractNamingRuleType>>();
 
-    private final Map<ConfigKey, ConfigValue<LQMGEntityType>> entityConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGEntityType>>();
+    private final Map<ConfigKey, ConfigValue<ClassNameRuleType>> entityConfigs =
+            new HashMap<ConfigKey, ConfigValue<ClassNameRuleType>>();
 
     private final JAXBContext jaxbContext;
 
-    private final Map<ConfigKey, ConfigValue<LQMGEntityType>> mainEntityConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGEntityType>>();
+    private final Map<ConfigKey, ConfigValue<ClassNameRuleType>> mainEntityConfigs =
+            new HashMap<ConfigKey, ConfigValue<ClassNameRuleType>>();
 
-    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> mainNamingRuleConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
+    private final Map<ConfigKey, ConfigValue<RegexRuleType>> mainNamingRuleConfigs =
+            new HashMap<ConfigKey, ConfigValue<RegexRuleType>>();
 
-    private final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> namingRuleConfigs =
-            new HashMap<ConfigKey, ConfigValue<LQMGNamingRuleType>>();
+    private final Map<ConfigKey, ConfigValue<RegexRuleType>> namingRuleConfigs =
+            new HashMap<ConfigKey, ConfigValue<RegexRuleType>>();
 
     private final Map<String, Pattern> patternsByRegex = new HashMap<String, Pattern>();
 
@@ -98,11 +98,11 @@ public class ConfigurationContainer {
         processLQMGType(lqmgType, resource, bundle);
     }
 
-    private <T extends LQMGAbstractEntityType> void addValueToConfigMap(ConfigKey configKey,
+    private <T extends AbstractNamingRuleType> void addValueToConfigMap(ConfigKey configKey,
             ConfigValue<T> configValue,
             Map<ConfigKey, ConfigValue<T>> configMap) {
 
-        ConfigValue<? extends LQMGAbstractEntityType> cachedValue = cache.get(configKey);
+        ConfigValue<? extends AbstractNamingRuleType> cachedValue = cache.get(configKey);
         if (cachedValue != null) {
             cache.remove(configKey);
         }
@@ -129,28 +129,28 @@ public class ConfigurationContainer {
         configMap.put(configKey, configValue);
     }
 
-    public LQMGAbstractEntityType findConfigForKey(ConfigKey key) {
-        ConfigValue<? extends LQMGAbstractEntityType> configValue = cache.get(key);
+    public AbstractNamingRuleType findConfigForKey(ConfigKey key) {
+        ConfigValue<? extends AbstractNamingRuleType> configValue = cache.get(key);
         if (configValue != null) {
             if (configValue instanceof NullConfigValue) {
                 return null;
             } else {
-                return configValue.getEntityConfiguration();
+                return configValue.getNamingRule();
             }
         }
 
         configValue = findEntityConfigInMap(key, mainEntityConfigs);
         if (configValue != null) {
-            return configValue.getEntityConfiguration();
+            return configValue.getNamingRule();
         }
 
         return null;
     }
 
-    private ConfigValue<LQMGEntityType> findEntityConfigInMap(final ConfigKey key,
-            final Map<ConfigKey, ConfigValue<LQMGEntityType>> map) {
+    private ConfigValue<ClassNameRuleType> findEntityConfigInMap(final ConfigKey key,
+            final Map<ConfigKey, ConfigValue<ClassNameRuleType>> map) {
 
-        ConfigValue<LQMGEntityType> configValue = map.get(key);
+        ConfigValue<ClassNameRuleType> configValue = map.get(key);
         if (configValue != null) {
             return configValue;
         }
@@ -161,14 +161,14 @@ public class ConfigurationContainer {
         return null;
     }
 
-    private ConfigValue<LQMGNamingRuleType> findNamingRuleInMap(final ConfigKey key,
-            final Map<ConfigKey, ConfigValue<LQMGNamingRuleType>> map) {
+    private ConfigValue<RegexRuleType> findNamingRuleInMap(final ConfigKey key,
+            final Map<ConfigKey, ConfigValue<RegexRuleType>> map) {
 
         String entityName = key.getEntity();
 
         if (key.getSchemaName() != null) {
             String schemaName = key.getSchemaName();
-            for (Entry<ConfigKey, ConfigValue<LQMGNamingRuleType>> entry : map.entrySet()) {
+            for (Entry<ConfigKey, ConfigValue<RegexRuleType>> entry : map.entrySet()) {
                 ConfigKey entryKey = entry.getKey();
                 if (schemaName.equals(entryKey.getSchemaName())) {
 
@@ -186,6 +186,7 @@ public class ConfigurationContainer {
             patternsByRegex.put(regex, pattern);
         }
         Matcher matcher = pattern.matcher(value);
+
         // TODO
         return matcher.matches();
     }
@@ -194,10 +195,10 @@ public class ConfigurationContainer {
         String defaultPackageName = lqmgType.getDefaultPackage();
         String defaultSchemaName = lqmgType.getDefaultSchema();
 
-        LQMGEntitiesType entities = lqmgType.getEntities();
+        NamingRulesType entities = lqmgType.getNamingRules();
         if (entities != null) {
-            List<LQMGAbstractEntityType> entityAndEntitySet = entities.getEntityAndNamingRule();
-            for (LQMGAbstractEntityType lqmgAbstractEntity : entityAndEntitySet) {
+            List<AbstractNamingRuleType> entityAndEntitySet = entities.getClassNameRuleAndRegexRule();
+            for (AbstractNamingRuleType lqmgAbstractEntity : entityAndEntitySet) {
                 if (lqmgAbstractEntity.getPackage() == null) {
                     lqmgAbstractEntity.setPackage(defaultPackageName);
                 }
@@ -210,11 +211,11 @@ public class ConfigurationContainer {
                     lqmgAbstractEntity.setUseSchema(lqmgType.isDefaultUseSchema());
                 }
 
-                if (lqmgAbstractEntity instanceof LQMGEntityType) {
-                    LQMGEntityType lqmgEntity = (LQMGEntityType) lqmgAbstractEntity;
+                if (lqmgAbstractEntity instanceof ClassNameRuleType) {
+                    ClassNameRuleType lqmgEntity = (ClassNameRuleType) lqmgAbstractEntity;
                     ConfigKey configKey = new ConfigKey(lqmgEntity.getSchema(),
-                            lqmgEntity.getName());
-                    ConfigValue<LQMGEntityType> configValue = new ConfigValue<LQMGEntityType>(lqmgEntity,
+                            lqmgEntity.getEntity());
+                    ConfigValue<ClassNameRuleType> configValue = new ConfigValue<ClassNameRuleType>(lqmgEntity,
                             bundle, xmlConfigurationPath);
 
                     if (bundle == null) {
@@ -223,10 +224,10 @@ public class ConfigurationContainer {
                         addValueToConfigMap(configKey, configValue, entityConfigs);
                     }
                 } else {
-                    LQMGNamingRuleType lqmgEntitySet = (LQMGNamingRuleType) lqmgAbstractEntity;
+                    RegexRuleType lqmgEntitySet = (RegexRuleType) lqmgAbstractEntity;
                     ConfigKey configKey = new ConfigKey(lqmgEntitySet.getSchema(),
                             lqmgEntitySet.getRegex());
-                    ConfigValue<LQMGNamingRuleType> configValue = new ConfigValue<LQMGNamingRuleType>(lqmgEntitySet,
+                    ConfigValue<RegexRuleType> configValue = new ConfigValue<RegexRuleType>(lqmgEntitySet,
                             bundle, xmlConfigurationPath);
 
                     if (bundle == null) {

@@ -16,19 +16,19 @@
  */
 package org.everit.osgi.dev.lqmg.internal;
 
-import org.everit.osgi.dev.lqmg.schema.LQMGAbstractEntityType;
+import org.everit.osgi.dev.lqmg.schema.AbstractNamingRuleType;
 import org.osgi.framework.Bundle;
 
-public class ConfigValue<T extends LQMGAbstractEntityType> {
+public class ConfigValue<T extends AbstractNamingRuleType> {
 
     private final Bundle bundle;
 
     private final String configurationXMLPath;
 
-    private final T entityConfiguration;
+    private final T namingRule;
 
-    public ConfigValue(T entityConfiguration, Bundle bundle, String configurationXMLPath) {
-        this.entityConfiguration = entityConfiguration;
+    public ConfigValue(T namingRule, Bundle bundle, String configurationXMLPath) {
+        this.namingRule = namingRule;
         this.bundle = bundle;
         this.configurationXMLPath = configurationXMLPath;
     }
@@ -41,8 +41,8 @@ public class ConfigValue<T extends LQMGAbstractEntityType> {
         return configurationXMLPath;
     }
 
-    public T getEntityConfiguration() {
-        return entityConfiguration;
+    public T getNamingRule() {
+        return namingRule;
     }
 
 }
