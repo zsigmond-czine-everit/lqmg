@@ -38,6 +38,7 @@ import liquibase.resource.ResourceAccessor;
 
 import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
 import org.everit.osgi.dev.lqmg.internal.LQMGChangeExecListener;
+import org.everit.osgi.dev.lqmg.internal.LQMGMetadataExporter;
 import org.everit.osgi.dev.lqmg.internal.LQMGNamingStrategy;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
@@ -49,8 +50,6 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.FrameworkWiring;
-
-import com.mysema.query.sql.codegen.MetaDataExporter;
 
 /**
  * This class responsible for generate QueryDSL JAVA classes.
@@ -101,8 +100,7 @@ public class LQMG {
     private static void exportMetaData(final GenerationProperties parameters,
             final Connection connection, ConfigurationContainer configContainer) throws SQLException {
         LOGGER.log(Level.INFO, "Start meta data export.");
-        MetaDataExporter metaDataExporter = new MetaDataExporter();
-        metaDataExporter.setNamingStrategy(new LQMGNamingStrategy(configContainer));
+        LQMGMetadataExporter metaDataExporter = new LQMGMetadataExporter(configContainer, parameters.getPackages());
 
         metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
         metaDataExporter.export(connection.getMetaData());

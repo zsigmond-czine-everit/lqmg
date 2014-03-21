@@ -21,7 +21,6 @@
 // Generated on: 2014.03.20 at 10:50:07 PM CET 
 //
 
-
 package org.everit.osgi.dev.lqmg.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -30,11 +29,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for AbstractNamingRuleType complex type.
+ * <p>
+ * Java class for AbstractNamingRuleType complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="AbstractNamingRuleType">
@@ -55,140 +55,124 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AbstractNamingRuleType")
 @XmlSeeAlso({
-    RegexRuleType.class,
-    ClassNameRuleType.class
+        RegexRuleType.class,
+        ClassNameRuleType.class
 })
 public class AbstractNamingRuleType {
 
-    @XmlAttribute(name = "schema")
-    protected String schema;
     @XmlAttribute(name = "package")
     protected String _package;
-    @XmlAttribute(name = "useSchema")
-    protected Boolean useSchema;
     @XmlAttribute(name = "prefix")
     protected String prefix;
+    @XmlAttribute(name = "schema")
+    protected String schema;
     @XmlAttribute(name = "suffix")
     protected String suffix;
-
-    /**
-     * Gets the value of the schema property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getSchema() {
-        return schema;
-    }
-
-    /**
-     * Sets the value of the schema property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setSchema(String value) {
-        this.schema = value;
-    }
+    @XmlAttribute(name = "useSchema")
+    protected Boolean useSchema;
 
     /**
      * Gets the value of the package property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getPackage() {
         return _package;
     }
 
     /**
-     * Sets the value of the package property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setPackage(String value) {
-        this._package = value;
-    }
-
-    /**
-     * Gets the value of the useSchema property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
-     */
-    public Boolean isUseSchema() {
-        return useSchema;
-    }
-
-    /**
-     * Sets the value of the useSchema property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
-     */
-    public void setUseSchema(Boolean value) {
-        this.useSchema = value;
-    }
-
-    /**
      * Gets the value of the prefix property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getPrefix() {
         return prefix;
     }
 
     /**
-     * Sets the value of the prefix property.
+     * Gets the value of the schema property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
-    public void setPrefix(String value) {
-        this.prefix = value;
+    public String getSchema() {
+        return schema;
     }
 
     /**
      * Gets the value of the suffix property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getSuffix() {
         return suffix;
     }
 
     /**
+     * Gets the value of the useSchema property.
+     * 
+     * @return possible object is {@link Boolean }
+     * 
+     */
+    public Boolean isUseSchema() {
+        return useSchema;
+    }
+
+    /**
+     * Sets the value of the package property.
+     * 
+     * @param value
+     *            allowed object is {@link String }
+     * 
+     */
+    public void setPackage(String value) {
+        this._package = value;
+    }
+
+    /**
+     * Sets the value of the prefix property.
+     * 
+     * @param value
+     *            allowed object is {@link String }
+     * 
+     */
+    public void setPrefix(String value) {
+        this.prefix = value;
+    }
+
+    /**
+     * Sets the value of the schema property.
+     * 
+     * @param value
+     *            allowed object is {@link String }
+     * 
+     */
+    public void setSchema(String value) {
+        this.schema = value;
+    }
+
+    /**
      * Sets the value of the suffix property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setSuffix(String value) {
         this.suffix = value;
     }
 
+    /**
+     * Sets the value of the useSchema property.
+     * 
+     * @param value
+     *            allowed object is {@link Boolean }
+     * 
+     */
+    public void setUseSchema(Boolean value) {
+        this.useSchema = value;
+    }
 }

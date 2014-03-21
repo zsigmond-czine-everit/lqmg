@@ -92,6 +92,10 @@ public class GenerationProperties {
     }
 
     public void setPackages(String[] packages) {
+        if (packages == null) {
+            throw new IllegalArgumentException("Packages cannot be null. In case all packages should be included, a"
+                    + " zero length array should be used.");
+        }
         this.packages = packages;
     }
 

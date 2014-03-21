@@ -129,19 +129,19 @@ public class ConfigurationContainer {
         configMap.put(configKey, configValue);
     }
 
-    public AbstractNamingRuleType findConfigForKey(ConfigKey key) {
+    public ConfigValue<? extends AbstractNamingRuleType> findConfigForKey(ConfigKey key) {
         ConfigValue<? extends AbstractNamingRuleType> configValue = cache.get(key);
         if (configValue != null) {
             if (configValue instanceof NullConfigValue) {
                 return null;
             } else {
-                return configValue.getNamingRule();
+                return configValue;
             }
         }
 
         configValue = findEntityConfigInMap(key, mainEntityConfigs);
         if (configValue != null) {
-            return configValue.getNamingRule();
+            return configValue;
         }
 
         return null;
@@ -161,7 +161,7 @@ public class ConfigurationContainer {
         return null;
     }
 
-    private ConfigValue<RegexRuleType> findNamingRuleInMap(final ConfigKey key,
+    private ConfigValue<RegexRuleType> findRegexRuleInMap(final ConfigKey key,
             final Map<ConfigKey, ConfigValue<RegexRuleType>> map) {
 
         String entityName = key.getEntity();
@@ -218,6 +218,7 @@ public class ConfigurationContainer {
                     ConfigValue<ClassNameRuleType> configValue = new ConfigValue<ClassNameRuleType>(lqmgEntity,
                             bundle, xmlConfigurationPath);
 
+                    validatePackage(configValue);
                     if (bundle == null) {
                         addValueToConfigMap(configKey, configValue, mainEntityConfigs);
                     } else {
@@ -230,6 +231,7 @@ public class ConfigurationContainer {
                     ConfigValue<RegexRuleType> configValue = new ConfigValue<RegexRuleType>(lqmgEntitySet,
                             bundle, xmlConfigurationPath);
 
+                    validatePackage(configValue);
                     if (bundle == null) {
                         addValueToConfigMap(configKey, configValue, mainNamingRuleConfigs);
                     } else {
@@ -251,5 +253,24 @@ public class ConfigurationContainer {
         } catch (JAXBException e) {
             throw new LQMGException("Could not unmarshal LQMG configuration: " + configurationURL.toExternalForm(), e);
         }
+    }
+
+    private void validatePackage(ConfigValue<? extends AbstractNamingRuleType> configValue) {
+        AbstractNamingRuleType namingRule = configValue.getNamingRule();
+        if (namingRule.getPackage() != null && !namingRule.getPackage().trim().equals("")) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder("Missing java package: ConfigValue [bundle=")
+                .append(configValue.getBundle()).append(", configurationXMLPath=")
+                .append(configValue.getConfigurationXMLPath()).append(", namingRule.schema=")
+                .append(namingRule.getSchema()).append(", ");
+
+        if (namingRule instanceof RegexRuleType) {
+            sb.append("namingRule.regex=").append(((RegexRuleType) namingRule).getRegex());
+        } else if (namingRule instanceof ClassNameRuleType) {
+            sb.append("namingRule.class=").append(((ClassNameRuleType) namingRule).getClazz());
+        }
+        sb.append("].");
+        throw new LQMGException(sb.toString(), null);
     }
 }
