@@ -16,31 +16,52 @@
  */
 package org.everit.osgi.dev.lqmg.internal;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.everit.osgi.dev.lqmg.LQMGException;
 import org.everit.osgi.dev.lqmg.schema.AbstractNamingRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Files;
+import com.mysema.codegen.CodeWriter;
+import com.mysema.codegen.JavaWriter;
+import com.mysema.codegen.model.ClassType;
+import com.mysema.codegen.model.SimpleType;
+import com.mysema.codegen.model.Type;
+import com.mysema.codegen.model.TypeCategory;
 import com.mysema.query.codegen.EntityType;
+import com.mysema.query.codegen.JavaTypeMappings;
+import com.mysema.query.codegen.Property;
+import com.mysema.query.codegen.Serializer;
+import com.mysema.query.codegen.SimpleSerializerConfig;
+import com.mysema.query.codegen.TypeMappings;
+import com.mysema.query.sql.ColumnImpl;
+import com.mysema.query.sql.ColumnMetadata;
+import com.mysema.query.sql.Configuration;
 import com.mysema.query.sql.codegen.DefaultNamingStrategy;
 import com.mysema.query.sql.codegen.KeyDataFactory;
-import com.mysema.query.sql.codegen.MetaDataExporter;
+import com.mysema.query.sql.codegen.MetaDataSerializer;
 import com.mysema.query.sql.codegen.NamingStrategy;
 import com.mysema.query.sql.support.ForeignKeyData;
 import com.mysema.query.sql.support.InverseForeignKeyData;
+import com.mysema.query.sql.support.NotNullImpl;
 import com.mysema.query.sql.support.PrimaryKeyData;
+import com.mysema.query.sql.support.SizeImpl;
 
-public class LQMGMetadataExporter extends MetaDataExporter {
+public class LQMGMetadataExporter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(LQMGMetadataExporter.class);
 
@@ -48,8 +69,24 @@ public class LQMGMetadataExporter extends MetaDataExporter {
 
     private final Set<String> packages;
 
+    private TypeMappings typeMappings;
+
+    private Serializer serializer;
+
+    private boolean columnAnnotations = false;
+
+    private Configuration configuration;
+
+    private boolean validationAnnotations = false;
+
+    private final Set<String> classes = new HashSet<String>();
+
+    private File targetFolder;
+
+    private String sourceEncoding = "UTF-8";
+
     protected NamingStrategy namingStrategy = new DefaultNamingStrategy();
-    
+
     private final KeyDataFactory keyDataFactory;
 
     public LQMGMetadataExporter(ConfigurationContainer configurationContainer, String[] packages) {
@@ -58,24 +95,60 @@ public class LQMGMetadataExporter extends MetaDataExporter {
         this.keyDataFactory = new LQMGKeyDataFactory(configurationContainer);
     }
 
-    @Override
     protected EntityType createEntityType(String schemaName, String tableName, String className) {
-        EntityType entityType = super.createEntityType(schemaName, tableName, className);
 
-        ConfigKey configKey = new ConfigKey(schemaName, tableName);
-        ConfigValue<? extends AbstractNamingRuleType> configValue = configurationContainer.findConfigForKey(configKey);
+        ConfigValue<? extends AbstractNamingRuleType> configValue = configurationContainer.findConfigForEntity(
+                schemaName, tableName);
         AbstractNamingRuleType namingRule = configValue.getNamingRule();
-        if (namingRule != null && !namingRule.isUseSchema()) {
-            entityType.getData().remove("schema");
+
+        EntityType classModel;
+        String packageName = namingRule.getPackage();
+        String simpleName = namingRule.getPrefix() + className + namingRule.getSuffix();
+        Type classTypeModel = new SimpleType(TypeCategory.ENTITY,
+                packageName + "." + simpleName, packageName, simpleName, false, false);
+        classModel = new EntityType(classTypeModel);
+        typeMappings.register(classModel, classModel);
+
+        if (namingRule != null && namingRule.isUseSchema()) {
+            classModel.getData().put("schema", schemaName);
         }
-        return entityType;
+        classModel.getData().put("table", tableName);
+        return classModel;
+    }
+
+    /**
+     * Export the tables based on the given database metadata
+     *
+     * @param md
+     * @throws SQLException
+     */
+    public void export(DatabaseMetaData md) throws SQLException {
+        typeMappings = new JavaTypeMappings();
+        namingStrategy = new DefaultNamingStrategy();
+        serializer = new MetaDataSerializer(typeMappings, namingStrategy, false, Collections.<String> emptySet());
+        configuration = Configuration.DEFAULT;
+
+        List<String> types = new ArrayList<String>(2);
+        types.add("TABLE");
+        types.add("VIEW");
+
+        ResultSet tables = md.getTables(null, null, null,
+                types.toArray(new String[types.size()]));
+        try {
+            while (tables.next()) {
+                handleTable(md, tables);
+            }
+        } finally {
+            tables.close();
+        }
+
     }
 
     protected void handleTable(DatabaseMetaData md, ResultSet tables) throws SQLException {
         String schema = tables.getString("TABLE_SCHEM");
         String entity = tables.getString("TABLE_NAME");
-        ConfigKey configKey = new ConfigKey(schema, entity);
-        ConfigValue<? extends AbstractNamingRuleType> configValue = configurationContainer.findConfigForKey(configKey);
+        ConfigValue<? extends AbstractNamingRuleType> configValue = configurationContainer
+                .findConfigForEntity(schema, entity);
         if (configValue == null) {
             LOGGER.info("No configuration for table '" + entity + "' in schema '" + schema
                     + "'. Ignoring from metadata class generation");
@@ -90,46 +163,11 @@ public class LQMGMetadataExporter extends MetaDataExporter {
             return;
         }
 
-        try {
-            callSuper("handleTable", new Class[] { DatabaseMetaData.class, ResultSet.class },
-                    new Object[] { md, tables });
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            } else if (cause instanceof SQLException) {
-                throw (SQLException) cause;
-            } else if (cause instanceof Error) {
-                throw (Error) cause;
-            }
-        }
-    }
-
-    private void callSuper(String methodName, Class<?>[] argumentTypes, Object[] arguments)
-            throws InvocationTargetException {
-        try {
-            Method superMethod = super.getClass().getMethod(methodName, argumentTypes);
-            superMethod.setAccessible(true);
-            superMethod.invoke(this, arguments);
-        } catch (NoSuchMethodException e) {
-            throw new LQMGException("Error in reflection call", e);
-        } catch (SecurityException e) {
-            throw new LQMGException("Error in reflection call", e);
-        } catch (IllegalAccessException e) {
-            throw new LQMGException("Error in reflection call", e);
-        } catch (IllegalArgumentException e) {
-            throw new LQMGException("Error in reflection call", e);
-        }
-    }
-
-    protected void handleTableOriginal(DatabaseMetaData md, ResultSet tables) throws SQLException {
         String catalog = tables.getString("TABLE_CAT");
-        String schema = tables.getString("TABLE_SCHEM");
-        String schemaName = tables.getString("TABLE_SCHEM");
         String tableName = tables.getString("TABLE_NAME");
         String normalizedTableName = namingStrategy.normalizeTableName(tableName);
-        String className = namingStrategy.getClassName(normalizedTableName);
-        EntityType classModel = createEntityType(schemaName, normalizedTableName, className);
+        String className = configurationContainer.resolveClassName(schema, tableName, namingStrategy);
+        EntityType classModel = createEntityType(schema, normalizedTableName, className);
 
         // collect primary keys
         Map<String, PrimaryKeyData> primaryKeyData = keyDataFactory
@@ -167,33 +205,128 @@ public class LQMGMetadataExporter extends MetaDataExporter {
 
         LOGGER.info("Exported " + tableName + " successfully");
     }
-    
+
     private void serialize(EntityType type) {
         try {
-            callSuper("serialize", new Class[] {EntityType.class}, new Object[] {type});
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            } else if (cause instanceof Error) {
-                throw (Error) cause;
-            }
+            String fileSuffix = ".java";
+
+            String packageName = type.getPackageName();
+            String path = packageName.replace('.', '/') + "/" + type.getSimpleName() + fileSuffix;
+            write(serializer, path, type);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
+    private void write(Serializer serializer, String path, EntityType type) throws IOException {
+        File targetFile = new File(targetFolder, path);
+        classes.add(targetFile.getPath());
+        StringWriter w = new StringWriter();
+        CodeWriter writer = new JavaWriter(w);
+        serializer.serialize(type, SimpleSerializerConfig.DEFAULT, writer);
+
+        // conditional creation
+        boolean generate = true;
+        byte[] bytes = w.toString().getBytes(sourceEncoding);
+        if (targetFile.exists() && targetFile.length() == bytes.length) {
+            String str = Files.toString(targetFile, Charset.forName(sourceEncoding));
+            if (str.equals(w.toString())) {
+                generate = false;
+            }
+        } else {
+            targetFile.getParentFile().mkdirs();
+        }
+
+        if (generate) {
+            Files.write(bytes, targetFile);
+        }
+    }
+
+    protected Property createProperty(EntityType classModel, String normalizedColumnName,
+            String propertyName, Type typeModel) {
+        return new Property(
+                classModel,
+                propertyName,
+                propertyName,
+                typeModel,
+                Collections.<String> emptyList(),
+                false);
+    }
+
     private void handleColumn(EntityType classModel, String tableName, ResultSet columns) throws SQLException {
-        try {
-            callSuper("handleColumn", new Class[] { EntityType.class, String.class, ResultSet.class }, new Object[] {
-                    classModel, tableName, columns });
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            } else if (cause instanceof SQLException) {
-                throw (SQLException) cause;
-            } else if (cause instanceof Error) {
-                throw (Error) cause;
+        String columnName = columns.getString("COLUMN_NAME");
+        String normalizedColumnName = namingStrategy.normalizeColumnName(columnName);
+        int columnType = columns.getInt("DATA_TYPE");
+        Number columnSize = (Number) columns.getObject("COLUMN_SIZE");
+        Number columnDigits = (Number) columns.getObject("DECIMAL_DIGITS");
+        int nullable = columns.getInt("NULLABLE");
+
+        String propertyName = namingStrategy.getPropertyName(normalizedColumnName, classModel);
+        Class<?> clazz = configuration.getJavaType(columnType,
+                columnSize != null ? columnSize.intValue() : 0,
+                columnDigits != null ? columnDigits.intValue() : 0,
+                tableName, columnName);
+        if (clazz == null) {
+            throw new IllegalStateException("Found no mapping for " + columnType + " (" + tableName + "." + columnName
+                    + ")");
+        }
+        TypeCategory fieldType = TypeCategory.get(clazz.getName());
+        if (Number.class.isAssignableFrom(clazz)) {
+            fieldType = TypeCategory.NUMERIC;
+        } else if (Enum.class.isAssignableFrom(clazz)) {
+            fieldType = TypeCategory.ENUM;
+        }
+        Type typeModel = new ClassType(fieldType, clazz);
+        Property property = createProperty(classModel, normalizedColumnName, propertyName, typeModel);
+        ColumnMetadata column = ColumnMetadata.named(normalizedColumnName).ofType(columnType);
+        if (nullable == DatabaseMetaData.columnNoNulls) {
+            column = column.notNull();
+        }
+        if (columnSize != null) {
+            column = column.withSize(columnSize.intValue());
+        }
+        if (columnDigits != null) {
+            column = column.withDigits(columnDigits.intValue());
+        }
+        property.getData().put("COLUMN", column);
+
+        if (columnAnnotations) {
+            property.addAnnotation(new ColumnImpl(normalizedColumnName));
+        }
+        if (validationAnnotations) {
+            if (nullable == DatabaseMetaData.columnNoNulls) {
+                property.addAnnotation(new NotNullImpl());
+            }
+            int size = columns.getInt("COLUMN_SIZE");
+            if (size > 0 && clazz.equals(String.class)) {
+                property.addAnnotation(new SizeImpl(0, size));
             }
         }
+        classModel.addProperty(property);
+    }
+
+    /**
+     * Set the target folder
+     *
+     * @param targetFolder
+     *            target source folder to create the sources into (e.g. target/generated-sources/java)
+     */
+    public void setTargetFolder(File targetFolder) {
+        this.targetFolder = targetFolder;
+    }
+
+    /**
+     * @param columnAnnotations
+     */
+    public void setColumnAnnotations(boolean columnAnnotations) {
+        this.columnAnnotations = columnAnnotations;
+    }
+
+    /**
+     * @param validationAnnotations
+     */
+    public void setValidationAnnotations(boolean validationAnnotations) {
+        this.validationAnnotations = validationAnnotations;
     }
 }

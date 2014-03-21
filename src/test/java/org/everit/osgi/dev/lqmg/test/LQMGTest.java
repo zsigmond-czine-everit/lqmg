@@ -65,6 +65,7 @@ public class LQMGTest {
         GenerationProperties props = new GenerationProperties("myApp", new String[] {
                 "reference:" + bundle2URL.toExternalForm(),
                 "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
+        // props.setConfigurationPath("/tmp/xxxx");
         try {
             LQMG.generate(props);
         } finally {

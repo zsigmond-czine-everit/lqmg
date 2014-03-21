@@ -36,10 +36,10 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
+import org.everit.osgi.dev.lqmg.internal.ConfigPath;
 import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
 import org.everit.osgi.dev.lqmg.internal.LQMGChangeExecListener;
 import org.everit.osgi.dev.lqmg.internal.LQMGMetadataExporter;
-import org.everit.osgi.dev.lqmg.internal.LQMGNamingStrategy;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
 import org.h2.Driver;
@@ -246,6 +246,11 @@ public class LQMG {
             Liquibase liquibase = new Liquibase(schemaResource, resourceAccessor, database);
 
             ConfigurationContainer configContainer = new ConfigurationContainer();
+
+            if (parameters.getConfigurationPath() != null) {
+                configContainer.addConfiguration(new ConfigPath(null, parameters.getConfigurationPath()));
+            }
+
             LQMGChangeExecListener lqmgChangeExecListener = new LQMGChangeExecListener(configContainer);
             liquibase.setChangeExecListener(lqmgChangeExecListener);
 
