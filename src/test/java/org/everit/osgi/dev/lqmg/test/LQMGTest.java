@@ -17,9 +17,14 @@
 package org.everit.osgi.dev.lqmg.test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
+import javax.xml.bind.UnmarshalException;
+
+import org.apache.commons.io.FileUtils;
 import org.everit.osgi.dev.lqmg.GenerationProperties;
 import org.everit.osgi.dev.lqmg.LQMG;
 import org.everit.osgi.dev.lqmg.LQMGException;
@@ -46,7 +51,7 @@ public class LQMGTest {
      * Testing the normal usage of the LQMG module.
      */
     @Test
-    public void testLQMG() {
+    public void _01_testLQMGNoConfiguration() {
         String tmpDirProperty = "java.io.tmpdir";
         String tmpDir = System.getProperty(tmpDirProperty);
         if (tmpDir == null) {
@@ -65,9 +70,84 @@ public class LQMGTest {
         GenerationProperties props = new GenerationProperties("myApp", new String[] {
                 "reference:" + bundle2URL.toExternalForm(),
                 "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
-        // props.setConfigurationPath("/tmp/xxxx");
         try {
             LQMG.generate(props);
+        } finally {
+            LQMGTest.deleteFolder(testDirFile);
+        }
+    }
+
+    /**
+     * Testing the normal usage of the LQMG module.
+     */
+    @Test
+    public void _03_testLQMGGlobalConfiguration() {
+        String tmpDirProperty = "java.io.tmpdir";
+        String tmpDir = System.getProperty(tmpDirProperty);
+        if (tmpDir == null) {
+            Assert.fail("User temp directory could not be retrieved");
+        }
+
+        ClassLoader classLoader = LQMGTest.class.getClassLoader();
+        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+
+        UUID uuid = UUID.randomUUID();
+        File tmpDirFile = new File(tmpDir);
+        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+        String tempFolderName = testDirFile.getAbsolutePath();
+
+        GenerationProperties props = new GenerationProperties("myApp", new String[] {
+                "reference:" + bundle2URL.toExternalForm(),
+                "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
+
+        props.setPackages(new String[] { "org.everit.osgi.dev.lqmg.test.q2" });
+
+        try {
+            File configFile = new File(testDirFile, "config.xml");
+            URL globalConfigURL = this.getClass().getResource("/META-INF/global.1.lqmg.xml");
+            FileUtils.copyURLToFile(globalConfigURL, configFile);
+            props.setConfigurationPath(configFile.getAbsolutePath());
+            LQMG.generate(props);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            LQMGTest.deleteFolder(testDirFile);
+        }
+    }
+
+    /**
+     * Testing the normal usage of the LQMG module.
+     */
+    @Test
+    public void _02_testLQMGWrongConfigurationURL() {
+        String tmpDirProperty = "java.io.tmpdir";
+        String tmpDir = System.getProperty(tmpDirProperty);
+        if (tmpDir == null) {
+            Assert.fail("User temp directory could not be retrieved");
+        }
+
+        ClassLoader classLoader = LQMGTest.class.getClassLoader();
+        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+
+        UUID uuid = UUID.randomUUID();
+        File tmpDirFile = new File(tmpDir);
+        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+        String tempFolderName = testDirFile.getAbsolutePath();
+
+        GenerationProperties props = new GenerationProperties("myApp", new String[] {
+                "reference:" + bundle2URL.toExternalForm(),
+                "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
+        props.setConfigurationPath("/tmp/xxxx");
+        try {
+            LQMG.generate(props);
+            Assert.fail("An LQMG exception should have been thrown.");
+        } catch (LQMGException e) {
+            Throwable cause = e.getCause();
+            Assert.assertTrue(cause instanceof UnmarshalException);
+            Throwable fileNotFoundCause = cause.getCause();
+            Assert.assertTrue(fileNotFoundCause instanceof FileNotFoundException);
         } finally {
             LQMGTest.deleteFolder(testDirFile);
         }

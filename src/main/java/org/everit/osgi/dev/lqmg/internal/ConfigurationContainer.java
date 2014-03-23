@@ -196,6 +196,17 @@ public class ConfigurationContainer {
         } else if (namingRule instanceof ClassNameRuleType) {
             className = ((ClassNameRuleType) namingRule).getClazz();
         }
+
+        String prefix = namingRule.getPrefix();
+        if (prefix != null) {
+            className = prefix + className;
+        }
+
+        String suffix = namingRule.getSuffix();
+        if (suffix != null) {
+            className = className + suffix;
+        }
+
         classNameCache.put(key, className);
         return className;
     }
@@ -301,6 +312,14 @@ public class ConfigurationContainer {
 
                 if (lqmgAbstractEntity.isUseSchema() == null) {
                     lqmgAbstractEntity.setUseSchema(lqmgType.isDefaultUseSchema());
+                }
+
+                if (lqmgAbstractEntity.getPrefix() == null) {
+                    lqmgAbstractEntity.setPrefix(lqmgType.getDefaultPrefix());
+                }
+
+                if (lqmgAbstractEntity.getSuffix() == null) {
+                    lqmgAbstractEntity.setSuffix(lqmgType.getDefaultSuffix());
                 }
 
                 if (lqmgAbstractEntity instanceof ClassNameRuleType) {

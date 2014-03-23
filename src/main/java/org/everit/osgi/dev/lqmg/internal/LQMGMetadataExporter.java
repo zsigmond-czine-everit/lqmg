@@ -52,7 +52,6 @@ import com.mysema.query.sql.ColumnImpl;
 import com.mysema.query.sql.ColumnMetadata;
 import com.mysema.query.sql.Configuration;
 import com.mysema.query.sql.codegen.DefaultNamingStrategy;
-import com.mysema.query.sql.codegen.KeyDataFactory;
 import com.mysema.query.sql.codegen.MetaDataSerializer;
 import com.mysema.query.sql.codegen.NamingStrategy;
 import com.mysema.query.sql.support.ForeignKeyData;
@@ -87,7 +86,7 @@ public class LQMGMetadataExporter {
 
     protected NamingStrategy namingStrategy = new DefaultNamingStrategy();
 
-    private final KeyDataFactory keyDataFactory;
+    private final LQMGKeyDataFactory keyDataFactory;
 
     public LQMGMetadataExporter(ConfigurationContainer configurationContainer, String[] packages) {
         this.configurationContainer = configurationContainer;
@@ -103,9 +102,8 @@ public class LQMGMetadataExporter {
 
         EntityType classModel;
         String packageName = namingRule.getPackage();
-        String simpleName = namingRule.getPrefix() + className + namingRule.getSuffix();
         Type classTypeModel = new SimpleType(TypeCategory.ENTITY,
-                packageName + "." + simpleName, packageName, simpleName, false, false);
+                packageName + "." + className, packageName, className, false, false);
         classModel = new EntityType(classTypeModel);
         typeMappings.register(classModel, classModel);
 
@@ -157,7 +155,7 @@ public class LQMGMetadataExporter {
         AbstractNamingRuleType namingRule = configValue.getNamingRule();
 
         String javaPackage = namingRule.getPackage();
-        if (packages.size() > 0 || !packages.contains(javaPackage)) {
+        if (packages.size() > 0 && !packages.contains(javaPackage)) {
             LOGGER.info("Java package '" + javaPackage + "' is not included, ignoring entity '" + entity
                     + "' from schema '" + schema + "'.");
             return;

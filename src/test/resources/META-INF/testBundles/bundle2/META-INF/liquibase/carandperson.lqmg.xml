@@ -17,9 +17,8 @@
     along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<lqmg xmlns="http://everit.org/lqmg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" putSchemaIntoClass="false">
-  <entities>
-    <entity entityName="car" className="QCarTest" packageName="myPackage" />
+<lqmg xmlns="http://everit.org/lqmg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" defaultPackage="org.everit.osgi.dev.lqmg.test.q">
+  <namingRules>
     
-  </entities>
+  </namingRules>
 </lqmg>
