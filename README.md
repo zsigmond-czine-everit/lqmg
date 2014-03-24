@@ -24,3 +24,11 @@ dependencies. To get the necessary information how to use it, run the
 following command:
 
 <pre><code>java -jar org.everit.db.lqmg-1.0.0.jar --help</code></pre>
+
+## Configuration XMLs
+
+It is possible to define special configuration fragments for each bundle
+and also a global configuration file. The configuration files must match
+the http://everit.org/lqmg XML schema. To get more information about the
+XML structure, please see the lqmg-x.x.x.xml file in the META-INF folder
+of the jar lqmg jar file.
