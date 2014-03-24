@@ -30,7 +30,7 @@ public class GenerationProperties {
      * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
      * userMgmt;filter:="(version=2)"
      */
-    private String capability;
+    private String schema;
 
     /**
      * Optional path of a configuration XML. In case this configuration exists, the rules in it are stronger than the
@@ -60,15 +60,15 @@ public class GenerationProperties {
     public GenerationProperties(final String capability, final String[] bundleLocations, final String targetFolder) {
         this.targetFolder = targetFolder;
         this.bundleLocations = bundleLocations;
-        this.capability = capability;
+        this.schema = capability;
     }
 
     public String[] getBundleLocations() {
         return bundleLocations;
     }
 
-    public String getCapability() {
-        return capability;
+    public String getSchema() {
+        return schema;
     }
 
     public String getConfigurationPath() {
@@ -83,8 +83,8 @@ public class GenerationProperties {
         return targetFolder;
     }
 
-    public void setCapability(String schema) {
-        this.capability = schema;
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
     public void setConfigurationPath(String configurationPath) {

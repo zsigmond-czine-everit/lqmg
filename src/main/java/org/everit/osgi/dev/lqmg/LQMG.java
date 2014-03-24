@@ -121,7 +121,7 @@ public class LQMG {
             osgiContainer = LQMG.startOSGiContainer(parameters.getBundleLocations(), tempDirectory.getAbsolutePath());
 
             Map<Bundle, List<BundleCapability>> matchingBundles = LiquibaseOSGiUtil
-                    .findBundlesBySchemaExpression(parameters.getCapability(),
+                    .findBundlesBySchemaExpression(parameters.getSchema(),
                             osgiContainer.getBundleContext(), Bundle.RESOLVED);
 
             if (matchingBundles.size() == 0) {
@@ -130,7 +130,7 @@ public class LQMG {
             if (matchingBundles.size() > 1) {
                 LOGGER.log(Level.WARNING,
                         "Found multiple bundles containing matching capabilities for schema"
-                                + " expression: '" + parameters.getCapability()
+                                + " expression: '" + parameters.getSchema()
                                 + "'. Using the first one from list: "
                                 + matchingBundles.keySet().toString());
             }
@@ -187,7 +187,7 @@ public class LQMG {
 
         throw new LQMGException(
                 "Could not find matching capability in any of the bundles for schema expression: "
-                        + parameters.getCapability(), null);
+                        + parameters.getSchema(), null);
     }
 
     private static Framework startOSGiContainer(final String[] bundleLocations, final String tempDirPath)
@@ -270,7 +270,7 @@ public class LQMG {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new LQMGException(
                     "Error during processing XML file; "
-                            + parameters.getCapability(), e);
+                            + parameters.getSchema(), e);
         } finally {
             if (connection != null) {
                 try {
