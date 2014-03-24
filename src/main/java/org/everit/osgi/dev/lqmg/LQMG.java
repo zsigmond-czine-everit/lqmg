@@ -118,7 +118,7 @@ public class LQMG {
         File tempDirectory = null;
         try {
             tempDirectory = LQMG.createTempDirectory();
-            osgiContainer = LQMG.startOSGiContainer(parameters.getBundlePaths(), tempDirectory.getAbsolutePath());
+            osgiContainer = LQMG.startOSGiContainer(parameters.getBundleLocations(), tempDirectory.getAbsolutePath());
 
             Map<Bundle, List<BundleCapability>> matchingBundles = LiquibaseOSGiUtil
                     .findBundlesBySchemaExpression(parameters.getCapability(),
@@ -190,7 +190,7 @@ public class LQMG {
                         + parameters.getCapability(), null);
     }
 
-    private static Framework startOSGiContainer(final String[] bundlePaths, final String tempDirPath)
+    private static Framework startOSGiContainer(final String[] bundleLocations, final String tempDirPath)
             throws BundleException {
         FrameworkFactory frameworkFactory = ServiceLoader
                 .load(FrameworkFactory.class).iterator().next();
@@ -206,11 +206,11 @@ public class LQMG {
         framework.start();
 
         BundleContext systemBundleContext = framework.getBundleContext();
-        for (String bundlePath : bundlePaths) {
+        for (String bundleLocation : bundleLocations) {
             try {
-                systemBundleContext.installBundle(bundlePath);
+                systemBundleContext.installBundle(bundleLocation);
             } catch (BundleException e) {
-                LOGGER.log(Level.WARNING, "Could not start bundle " + bundlePath, e);
+                LOGGER.log(Level.WARNING, "Could not start bundle " + bundleLocation, e);
             }
         }
         FrameworkWiring frameworkWiring = framework

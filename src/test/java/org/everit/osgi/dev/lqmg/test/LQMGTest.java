@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.everit.osgi.dev.lqmg.GenerationProperties;
 import org.everit.osgi.dev.lqmg.LQMG;
 import org.everit.osgi.dev.lqmg.LQMGException;
+import org.everit.osgi.dev.lqmg.LQMGMain;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -72,6 +73,7 @@ public class LQMGTest {
                 "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
         try {
             LQMG.generate(props);
+            // TODO Test if there are no generated classes
         } finally {
             LQMGTest.deleteFolder(testDirFile);
         }
@@ -109,6 +111,83 @@ public class LQMGTest {
             FileUtils.copyURLToFile(globalConfigURL, configFile);
             props.setConfigurationPath(configFile.getAbsolutePath());
             LQMG.generate(props);
+            // TODO check if generated classes are ok.
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            LQMGTest.deleteFolder(testDirFile);
+        }
+    }
+
+    /**
+     * Testing the normal usage of the LQMG module.
+     */
+    @Test
+    public void _04_testConfigInBundles() {
+        String tmpDirProperty = "java.io.tmpdir";
+        String tmpDir = System.getProperty(tmpDirProperty);
+        if (tmpDir == null) {
+            Assert.fail("User temp directory could not be retrieved");
+        }
+
+        ClassLoader classLoader = LQMGTest.class.getClassLoader();
+        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+
+        UUID uuid = UUID.randomUUID();
+        File tmpDirFile = new File(tmpDir);
+        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+        String tempFolderName = testDirFile.getAbsolutePath();
+
+        GenerationProperties props = new GenerationProperties("simpleConfig", new String[] {
+                "reference:" + bundle2URL.toExternalForm(),
+                "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
+
+        props.setPackages(new String[] { "org.everit.osgi.dev.lqmg.test.q2" });
+
+        try {
+            File configFile = new File(testDirFile, "config.xml");
+            URL globalConfigURL = this.getClass().getResource("/META-INF/global.2.lqmg.xml");
+            FileUtils.copyURLToFile(globalConfigURL, configFile);
+            props.setConfigurationPath(configFile.getAbsolutePath());
+            LQMG.generate(props);
+            // TODO check if generated classes are ok.
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            LQMGTest.deleteFolder(testDirFile);
+        }
+    }
+
+    /**
+     * Testing the normal usage of the LQMG module.
+     */
+    @Test
+    public void _05_testCommandLine() {
+        String tmpDirProperty = "java.io.tmpdir";
+        String tmpDir = System.getProperty(tmpDirProperty);
+        if (tmpDir == null) {
+            Assert.fail("User temp directory could not be retrieved");
+        }
+
+        ClassLoader classLoader = LQMGTest.class.getClassLoader();
+        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+
+        UUID uuid = UUID.randomUUID();
+        File tmpDirFile = new File(tmpDir);
+        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+        String tempFolderName = testDirFile.getAbsolutePath();
+
+        String bundleLocations = "reference:" + bundle2URL.toExternalForm() + ";" + "reference:"
+                + bundle1URL.toExternalForm();
+
+        try {
+            File configFile = new File(testDirFile, "config.xml");
+            URL globalConfigURL = this.getClass().getResource("/META-INF/global.2.lqmg.xml");
+            FileUtils.copyURLToFile(globalConfigURL, configFile);
+            LQMGMain.main(new String[] { "-s", "simpleConfig", "-b", bundleLocations, "-c", configFile.getAbsolutePath(), "-p", "org.everit.osgi.dev.lqmg.test.q2", "-o", tempFolderName});
+            // TODO check if generated classes are ok.
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -227,48 +306,4 @@ public class LQMGTest {
         }
     }
 
-    // /**
-    // * Testing the command line processor with various attributes.
-    // */
-    // @Test
-    // public void testMainArguments() {
-    // String tmpDirProperty = "java.io.tmpdir";
-    // String tmpDir = System.getProperty(tmpDirProperty);
-    // if (tmpDir == null) {
-    // Assert.fail("User temp directory could not be retrieved");
-    // }
-    //
-    // UUID uuid = UUID.randomUUID();
-    // File tmpDirFile = new File(tmpDir);
-    // File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
-    //
-    // ClassLoader classLoader = LQMGTest.class.getClassLoader();
-    // URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
-    // URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
-    //
-    // String externalForm = bundle1URL.toExternalForm();
-    // String externalForm2 = bundle2URL.toExternalForm();
-    //
-    // try {
-    // String[] strings = {};
-    // LQMG.main(strings);
-    // strings = new String[] { "--help" };
-    // LQMG.main(strings);
-    // strings = new String[] { "--nincsilyen=valami" };
-    // LQMG.main(strings);
-    // strings = new String[] { "--schema=myApp", "--targetFolder=/tmp/generated" };
-    // LQMG.main(strings);
-    // strings = new String[] { "--schema=myApp", "--bundles=" + externalForm };
-    // LQMG.main(strings);
-    // strings = new String[] { "--schema=myApp", "--bundles=" + externalForm + ';' + externalForm2,
-    // "--targetFolder=/tmp/generated" };
-    // LQMG.main(strings);
-    // strings = new String[] { "--schema=myApp", "--bundles=" + externalForm + ';' + externalForm2,
-    // "--packageName=foo", "--targetFolder=/tmp/generated", "--schemaToPackage=false",
-    // "--schemaPattern=liquibase.schema" };
-    // LQMG.main(strings);
-    // } finally {
-    // LQMGTest.deleteFolder(testDirFile);
-    // }
-    // }
 }

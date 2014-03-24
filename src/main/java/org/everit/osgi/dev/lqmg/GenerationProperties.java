@@ -24,7 +24,7 @@ public class GenerationProperties {
     /**
      * The paths to the bundles (directory path of jar file path).
      */
-    private final String[] bundlePaths;
+    private final String[] bundleLocations;
 
     /**
      * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
@@ -57,14 +57,14 @@ public class GenerationProperties {
      * @param targetFolder
      *            the folder where source will be generated to.
      */
-    public GenerationProperties(final String capability, final String[] bundlePaths, final String targetFolder) {
+    public GenerationProperties(final String capability, final String[] bundleLocations, final String targetFolder) {
         this.targetFolder = targetFolder;
-        this.bundlePaths = bundlePaths;
+        this.bundleLocations = bundleLocations;
         this.capability = capability;
     }
 
-    public String[] getBundlePaths() {
-        return bundlePaths;
+    public String[] getBundleLocations() {
+        return bundleLocations;
     }
 
     public String getCapability() {

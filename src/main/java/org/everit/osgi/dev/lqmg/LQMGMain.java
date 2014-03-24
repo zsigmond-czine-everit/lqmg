@@ -50,7 +50,7 @@ public class LQMGMain {
      */
     public static void main(final String[] args) {
         Options options = new Options();
-        options.addOption("b", ARG_BUNDLES, true, "Path to the persistent bundles separated by semicolon");
+        options.addOption("b", ARG_BUNDLES, true, "Location to the bundles separated by semicolon");
         options.addOption("p", ARG_PACKAGES, true, "Package names separated by comma that should be generated."
                 + " If not defined, all packages will be generated.");
         options.addOption("s", ARG_SCHEMA, true, "Expression that is used to select the first schema based on the"
@@ -83,6 +83,8 @@ public class LQMGMain {
         if (packages != null) {
             generationProps.setPackages(packages.split("\\,"));
         }
+        
+        LQMG.generate(generationProps);
     }
 
     private static void printHelp(Options options) {
