@@ -34,6 +34,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.everit.osgi.dev.lqmg.internal.ConfigPath;
@@ -236,10 +237,12 @@ public class LQMG {
             LOGGER.log(Level.INFO, "Get database.");
             AbstractJdbcDatabase database = new H2Database();
             database.setConnection(new JdbcConnection(connection));
+            
+            generateLQMGTables(database);
 
             LOGGER.log(Level.INFO, "Start LiquiBase and update.");
             Map<String, Object> attributes = bundleCapability.getAttributes();
-
+            
             ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle, attributes);
 
             String schemaResource = (String) attributes.get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
@@ -283,6 +286,13 @@ public class LQMG {
                 }
             }
         }
+    }
+
+    private static void generateLQMGTables(AbstractJdbcDatabase database) throws LiquibaseException {
+        Liquibase liquibase = new Liquibase("META-INF/lqmg.changelog.xml", new ClassLoaderResourceAccessor(
+                LQMG.class.getClassLoader()), database);
+        
+        liquibase.update((String) null); 
     }
 
     /**

@@ -48,6 +48,42 @@ public class LQMGTest {
         folder.delete();
     }
 
+//    @Test
+//    public void _00_generateQDSLForLQMG() {
+//        String tmpDirProperty = "java.io.tmpdir";
+//        String tmpDir = System.getProperty(tmpDirProperty);
+//        if (tmpDir == null) {
+//            Assert.fail("User temp directory could not be retrieved");
+//        }
+//
+//        ClassLoader classLoader = LQMGTest.class.getClassLoader();
+//        URL bundle1URL = classLoader.getResource("META-INF/testBundles/bundle1/");
+//        URL bundle2URL = classLoader.getResource("META-INF/testBundles/bundle2/");
+//
+//        UUID uuid = UUID.randomUUID();
+//        File tmpDirFile = new File(tmpDir);
+//        File testDirFile = new File(tmpDirFile, "lqmgtest-" + uuid.toString());
+//
+//        GenerationProperties props = new GenerationProperties("myApp", new String[] {
+//                "reference:" + bundle2URL.toExternalForm(),
+//                "reference:" + bundle1URL.toExternalForm() },
+//                "C:/Users/balazs_zsoldos/git/osgi-lqmg/src/main/generated/java");
+//
+//        props.setPackages(new String[] { "org.everit.osgi.dev.lqmg.internal.schema.qdsl" });
+//
+//        try {
+//            File configFile = new File(testDirFile, "config.xml");
+//            URL globalConfigURL = this.getClass().getResource("/META-INF/lqmg.lqmg.xml");
+//            FileUtils.copyURLToFile(globalConfigURL, configFile);
+//            props.setConfigurationPath(configFile.getAbsolutePath());
+//            LQMG.generate(props);
+//            // TODO check if generated classes are ok.
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } finally {
+//        }
+//    }
+
     /**
      * Testing the normal usage of the LQMG module.
      */
@@ -186,7 +222,8 @@ public class LQMGTest {
             File configFile = new File(testDirFile, "config.xml");
             URL globalConfigURL = this.getClass().getResource("/META-INF/global.2.lqmg.xml");
             FileUtils.copyURLToFile(globalConfigURL, configFile);
-            LQMGMain.main(new String[] { "-s", "simpleConfig", "-b", bundleLocations, "-c", configFile.getAbsolutePath(), "-p", "org.everit.osgi.dev.lqmg.test.q2", "-o", tempFolderName});
+            LQMGMain.main(new String[] { "-s", "simpleConfig", "-b", bundleLocations, "-c",
+                    configFile.getAbsolutePath(), "-p", "org.everit.osgi.dev.lqmg.test.q2", "-o", tempFolderName });
             // TODO check if generated classes are ok.
         } catch (IOException e) {
             throw new RuntimeException(e);

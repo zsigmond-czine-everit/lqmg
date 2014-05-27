@@ -23,7 +23,7 @@
       <regex>(.*)</regex>
       <replacement>$1Test</replacement>
     </regexRule>
-    <classNameRule useSchema="true" package="org.everit.osgi.dev.lqmg.test.q2">
+    <classNameRule useSchema="true" package="org.everit.osgi.dev.lqmg.test.q2" suffix="Suffix">
      <entity>car</entity>
      <class>CarTT</class>
     </classNameRule>

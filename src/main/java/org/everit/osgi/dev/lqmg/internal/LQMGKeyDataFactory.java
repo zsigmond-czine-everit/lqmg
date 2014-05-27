@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.dev.lqmg.schema.AbstractNamingRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.AbstractNamingRuleType;
 
 import com.mysema.codegen.model.SimpleType;
 import com.mysema.codegen.model.Type;
