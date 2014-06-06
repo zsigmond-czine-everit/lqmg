@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This file is part of Everit - Liquibase-QueryDSL Model Generator.
+
+    Everit - Liquibase-QueryDSL Model Generator is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Everit - Liquibase-QueryDSL Model Generator is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
+  logicalFilePath="lqmg" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+  <changeSet id="2.1.0" author="everit">
+    <createTable tableName="querydsl_table_mapping">
+      <column name="schema_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="table_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="package_name" type="varchar(255)" />
+      <column name="class_name" type="varchar(255)" />
+    </createTable>
+    <addPrimaryKey tableName="querydsl_table_mapping" columnNames="schema_name,table_name" />
+
+
+    <createTable tableName="querydsl_column_mapping">
+      <column name="schema_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="table_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="column_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="property_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addPrimaryKey tableName="querydsl_column_mapping" columnNames="schema_name,table_name,column_name" />
+
+
+    <createTable tableName="querydsl_foreignkey_mapping">
+      <column name="schema_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="table_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="foreignkey_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="property_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addPrimaryKey tableName="querydsl_foreignkey_mapping" columnNames="schema_name,table_name,foreignkey_name" />
+
+
+    <createTable tableName="querydsl_primarykey_mapping">
+      <column name="schema_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="table_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="primarykey_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="property_name" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addPrimaryKey tableName="querydsl_primarykey_mapping" columnNames="schema_name,table_name,primarykey_name" />
+  </changeSet>
+
+</databaseChangeLog>

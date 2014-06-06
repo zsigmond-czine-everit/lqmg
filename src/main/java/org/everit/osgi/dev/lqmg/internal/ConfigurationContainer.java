@@ -35,11 +35,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.dev.lqmg.schema.AbstractNamingRuleType;
-import org.everit.osgi.dev.lqmg.schema.ClassNameRuleType;
-import org.everit.osgi.dev.lqmg.schema.LQMGType;
-import org.everit.osgi.dev.lqmg.schema.NamingRulesType;
-import org.everit.osgi.dev.lqmg.schema.RegexRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.AbstractNamingRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.ClassNameRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.LQMGType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.NamingRulesType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.RegexRuleType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.everit.osgi.dev.lqmg.schema.AbstractNamingRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.AbstractNamingRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,12 +84,13 @@ public class LQMGMetadataExporter {
 
     private String sourceEncoding = "UTF-8";
 
-    protected NamingStrategy namingStrategy = new DefaultNamingStrategy();
+    protected NamingStrategy namingStrategy;
 
     private final LQMGKeyDataFactory keyDataFactory;
 
     public LQMGMetadataExporter(ConfigurationContainer configurationContainer, String[] packages) {
         this.configurationContainer = configurationContainer;
+        this.namingStrategy = new LQMGNamingStrategy(configurationContainer);
         this.packages = new HashSet<String>(Arrays.asList(packages));
         this.keyDataFactory = new LQMGKeyDataFactory(configurationContainer);
     }
@@ -122,7 +123,6 @@ public class LQMGMetadataExporter {
      */
     public void export(DatabaseMetaData md) throws SQLException {
         typeMappings = new JavaTypeMappings();
-        namingStrategy = new DefaultNamingStrategy();
         serializer = new MetaDataSerializer(typeMappings, namingStrategy, false, Collections.<String> emptySet());
         configuration = Configuration.DEFAULT;
 
