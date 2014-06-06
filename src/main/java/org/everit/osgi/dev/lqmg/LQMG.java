@@ -61,6 +61,8 @@ public class LQMG {
     public static final String CAPABILITY_LIQUIBASE_SCHEMA = "liquibase.schema";
     public static final String CAPABILITY_LQMG_CONFIG_RESOURCE = "lqmg.config.resource";
 
+    private static HackUtil frameworkUtil = new EquinoxHackUtilImpl();
+
     /**
      * The {@link Logger} instance for logging.
      */
@@ -125,7 +127,21 @@ public class LQMG {
                             osgiContainer.getBundleContext(), Bundle.RESOLVED);
 
             if (matchingBundles.size() == 0) {
-                LQMG.handleCapabilityNotFound(parameters, osgiContainer);
+                if (parameters.isHackWires()) {
+                    LOGGER.info("No matching bundle found. Trying to find unresolved bundles and hack their wires.");
+                    frameworkUtil.hackBundles(osgiContainer, tempDirectory);
+                    FrameworkWiring frameworkWiring = osgiContainer.adapt(FrameworkWiring.class);
+                    frameworkWiring.resolveBundles(null);
+
+                    matchingBundles = LiquibaseOSGiUtil
+                            .findBundlesBySchemaExpression(parameters.getSchema(),
+                                    osgiContainer.getBundleContext(), Bundle.RESOLVED);
+                } else {
+                    LOGGER.severe("No matching bundle found. Probably setting hackWires to true would help");
+                }
+                if (matchingBundles.size() == 0) {
+                    LQMG.throwCapabilityNotFound(parameters, osgiContainer);
+                }
             }
             if (matchingBundles.size() > 1) {
                 LOGGER.log(Level.WARNING,
@@ -171,7 +187,16 @@ public class LQMG {
 
     }
 
-    private static void handleCapabilityNotFound(final GenerationProperties parameters, final Framework osgiContainer) {
+    private static void throwCapabilityNotFound(final GenerationProperties parameters, final Framework osgiContainer) {
+
+        logUnresolvedBundles(osgiContainer);
+
+        throw new LQMGException(
+                "Could not find matching capability in any of the bundles for schema expression: "
+                        + parameters.getSchema(), null);
+    }
+
+    private static void logUnresolvedBundles(final Framework osgiContainer) {
         BundleContext systemBundleContext = osgiContainer.getBundleContext();
         Bundle[] bundles = systemBundleContext.getBundles();
 
@@ -184,10 +209,6 @@ public class LQMG {
                 }
             }
         }
-
-        throw new LQMGException(
-                "Could not find matching capability in any of the bundles for schema expression: "
-                        + parameters.getSchema(), null);
     }
 
     private static Framework startOSGiContainer(final String[] bundleLocations, final String tempDirPath)

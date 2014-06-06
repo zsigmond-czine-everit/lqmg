@@ -50,6 +50,12 @@ public class GenerationProperties {
     private String targetFolder;
 
     /**
+     * If true, LQMG will update the unresolved bundles in the way that all of their unsatisfied requirements will be
+     * modified to be optional.
+     */
+    private boolean hackWires = true;
+
+    /**
      * The simple constructor.
      * 
      * @param capability
@@ -101,6 +107,14 @@ public class GenerationProperties {
 
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
+    }
+
+    public void setHackWires(boolean strict) {
+        this.hackWires = strict;
+    }
+
+    public boolean isHackWires() {
+        return hackWires;
     }
 
 }

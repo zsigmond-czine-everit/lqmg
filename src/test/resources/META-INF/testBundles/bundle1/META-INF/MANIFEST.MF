@@ -6,4 +6,6 @@ Provide-Capability: liquibase.schema;name=myApp;resource=/META-INF/liquibase/myA
   liquibase.schema;name=doubledCap;resource=/META-INF/liquibase/doubledCap.xml,
   liquibase.schema;name=wrongSQL;resource=/META-INF/liquibase/wrongSQL.xml,
   liquibase.schema;name=simpleConfig;resource=/META-INF/liquibase/myApp.xml;lqmg.config.resource=/META-INF/liquibase/simple.lqmg.xml
-Require-Capability: liquibase.schema;filter:="(name=carandperson)"
+Require-Capability: liquibase.schema;filter:="(name=carandperson)",nonexistingCapability
+Import-Package: com.nonexistentpackage;attr=value,javax.sql
+Require-Bundle: nonExistingBundle
