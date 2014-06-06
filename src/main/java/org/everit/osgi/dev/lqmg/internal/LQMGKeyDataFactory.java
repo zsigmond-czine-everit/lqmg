@@ -59,12 +59,27 @@ public class LQMGKeyDataFactory {
 
     private final ConfigurationContainer configContainer;
 
-    public LQMGKeyDataFactory(ConfigurationContainer configContainer) {
+    public LQMGKeyDataFactory(final ConfigurationContainer configContainer) {
         this.configContainer = configContainer;
     }
 
-    public Map<String, InverseForeignKeyData> getExportedKeys(DatabaseMetaData md,
-            String catalog, String schema, String tableName) throws SQLException {
+    protected Type createType(@Nullable final String schemaName, final String table) {
+        String simpleName = configContainer.resolveClassName(schemaName, table, namingStrategy);
+        if (simpleName == null) {
+            throw new LQMGException("Cannot resolve class name for '" + table + "' table in '" + schemaName
+                    + "' schema.", null);
+        }
+
+        ConfigValue<? extends AbstractNamingRuleType> configValue = configContainer.findConfigForEntity(schemaName,
+                table);
+        AbstractNamingRuleType namingRule = configValue.getNamingRule();
+        String packageName = namingRule.getPackage();
+
+        return new SimpleType(packageName + "." + simpleName, packageName, simpleName);
+    }
+
+    public Map<String, InverseForeignKeyData> getExportedKeys(final DatabaseMetaData md,
+            final String catalog, final String schema, final String tableName) throws SQLException {
         ResultSet foreignKeys = md.getExportedKeys(catalog, schema, tableName);
         Map<String, InverseForeignKeyData> inverseForeignKeyData = new HashMap<String, InverseForeignKeyData>();
         try {
@@ -74,7 +89,7 @@ public class LQMGKeyDataFactory {
                 String foreignSchemaName = foreignKeys.getString(FK_FOREIGN_SCHEMA_NAME);
                 String foreignTableName = foreignKeys.getString(FK_FOREIGN_TABLE_NAME);
                 String foreignColumn = foreignKeys.getString(FK_FOREIGN_COLUMN_NAME);
-                if (name == null || name.isEmpty()) {
+                if ((name == null) || name.isEmpty()) {
                     name = tableName + "_" + foreignTableName + "_IFK";
                 }
 
@@ -92,8 +107,8 @@ public class LQMGKeyDataFactory {
         }
     }
 
-    public Map<String, ForeignKeyData> getImportedKeys(DatabaseMetaData md,
-            String catalog, String schema, String tableName) throws SQLException {
+    public Map<String, ForeignKeyData> getImportedKeys(final DatabaseMetaData md,
+            final String catalog, final String schema, final String tableName) throws SQLException {
         ResultSet foreignKeys = md.getImportedKeys(catalog, schema, tableName);
         Map<String, ForeignKeyData> foreignKeyData = new HashMap<String, ForeignKeyData>();
         try {
@@ -103,7 +118,7 @@ public class LQMGKeyDataFactory {
                 String parentTableName = foreignKeys.getString(FK_PARENT_TABLE_NAME);
                 String parentColumnName = foreignKeys.getString(FK_PARENT_COLUMN_NAME);
                 String foreignColumn = foreignKeys.getString(FK_FOREIGN_COLUMN_NAME);
-                if (name == null || name.isEmpty()) {
+                if ((name == null) || name.isEmpty()) {
                     name = tableName + "_" + parentTableName + "_FK";
                 }
 
@@ -121,15 +136,15 @@ public class LQMGKeyDataFactory {
         }
     }
 
-    public Map<String, PrimaryKeyData> getPrimaryKeys(DatabaseMetaData md,
-            String catalog, String schema, String tableName) throws SQLException {
+    public Map<String, PrimaryKeyData> getPrimaryKeys(final DatabaseMetaData md,
+            final String catalog, final String schema, final String tableName) throws SQLException {
         ResultSet primaryKeys = md.getPrimaryKeys(catalog, schema, tableName);
         Map<String, PrimaryKeyData> primaryKeyData = new HashMap<String, PrimaryKeyData>();
         try {
             while (primaryKeys.next()) {
                 String name = primaryKeys.getString(PK_NAME);
                 String columnName = primaryKeys.getString(PK_COLUMN_NAME);
-                if (name == null || name.isEmpty()) {
+                if ((name == null) || name.isEmpty()) {
                     name = tableName + "_PK";
                 }
 
@@ -144,20 +159,5 @@ public class LQMGKeyDataFactory {
         } finally {
             primaryKeys.close();
         }
-    }
-
-    protected Type createType(@Nullable String schemaName, String table) {
-        String simpleName = configContainer.resolveClassName(schemaName, table, namingStrategy);
-        if (simpleName == null) {
-            throw new LQMGException("Cannot resolve class name for '" + table + "' table in '" + schemaName
-                    + "' schema.", null);
-        }
-
-        ConfigValue<? extends AbstractNamingRuleType> configValue = configContainer.findConfigForEntity(schemaName,
-                table);
-        AbstractNamingRuleType namingRule = configValue.getNamingRule();
-        String packageName = namingRule.getPackage();
-
-        return new SimpleType(packageName + "." + simpleName, packageName, simpleName);
     }
 }

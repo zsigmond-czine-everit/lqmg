@@ -1,4 +1,20 @@
-package org.everit.osgi.dev.lqmg;
+/**
+ * This file is part of Everit - Liquibase-QueryDSL Model Generator.
+ *
+ * Everit - Liquibase-QueryDSL Model Generator is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Everit - Liquibase-QueryDSL Model Generator is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.everit.osgi.dev.lqmg.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,29 +59,10 @@ public class EquinoxHackUtilImpl implements HackUtil {
 
     private static final Logger LOGGER = Logger.getLogger(EquinoxHackUtilImpl.class.getName());
 
-    @Override
-    public void hackBundles(Framework osgiContainer, File tempDirectory) {
-        BundleContext systemBundleContext = osgiContainer.getBundleContext();
-
-        ServiceReference<PlatformAdmin> platformServiceSR = systemBundleContext
-                .getServiceReference(PlatformAdmin.class);
-
-        PlatformAdmin platformAdmin = systemBundleContext.getService(platformServiceSR);
-        State state = platformAdmin.getState();
-
-        Bundle[] bundles = systemBundleContext.getBundles();
-        List<BundleCapability> availableCapabilities = getAllCapabilities(bundles, state);
-        for (Bundle bundle : bundles) {
-            if (bundle.getState() == Bundle.INSTALLED) {
-                BundleDescription bundleDescription = state.getBundle(bundle.getBundleId());
-                hackBundle(bundle, bundleDescription, availableCapabilities);
-            }
-        }
-    }
-
-    private <V> String convertClauseFieldsToString(Map<String, V> map, boolean directives) {
-        if (map.size() == 0)
+    private <V> String convertClauseFieldsToString(final Map<String, V> map, final boolean directives) {
+        if (map.size() == 0) {
             return "";
+        }
         String assignment = directives ? ":=" : "=";
         Set<Entry<String, V>> set = map.entrySet();
         StringBuilder sb = new StringBuilder();
@@ -80,8 +77,9 @@ public class EquinoxHackUtilImpl implements HackUtil {
                     continue;
                 }
                 sb.append(key).append(assignment).append('"');
-                for (Object object : list)
+                for (Object object : list) {
                     sb.append(escapeClauseValue(object)).append(',');
+                }
                 sb.setLength(sb.length() - 1);
                 sb.append('"');
             } else {
@@ -91,76 +89,8 @@ public class EquinoxHackUtilImpl implements HackUtil {
         return sb.toString();
     }
 
-    private String escapeClauseValue(Object object) {
-        String stringValue = String.valueOf(object);
-        return stringValue.replace("\\", "\\\\").replace("\"", "\\\"");
-    }
-
-    private void hackBundle(Bundle bundle, BundleDescription bundleDescription,
-            List<BundleCapability> availableCapabilities) {
-        Manifest manifest = createHackedManifest(bundle, bundleDescription, availableCapabilities);
-
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        try {
-            JarOutputStream jarOut = new JarOutputStream(bout, manifest);
-            AbstractBundle abstractBundle = (AbstractBundle) bundle;
-            BaseData bundleData = (BaseData) abstractBundle.getBundleData();
-            BundleFile bundleFile = bundleData.getBundleFile();
-            BaseAdaptor adaptor = (BaseAdaptor) abstractBundle.getFramework().getAdaptor();
-
-            List<String> entries = adaptor.listEntryPaths(Arrays.asList(new BundleFile[] { bundleFile }), "/", null,
-                    BundleWiring.FINDENTRIES_RECURSE);
-
-            for (String entry : entries) {
-                if (!entry.equals("META-INF/MANIFEST.MF") && !entry.endsWith("/")) {
-                    copyBundleEntryIntoJar(bundle, entry, jarOut);
-                }
-            }
-            jarOut.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            bundle.update(new ByteArrayInputStream(bout.toByteArray()));
-        } catch (BundleException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String createClauseString(String namespace, Map<String, Object> attributeMap,
-            Map<String, String> directiveMap) {
-        String attributesPart = convertClauseFieldsToString(attributeMap, false);
-        String directivesPart = convertClauseFieldsToString(directiveMap, true);
-        StringBuilder sb = new StringBuilder(namespace);
-        if (!"".equals(attributesPart)) {
-            sb.append(attributesPart);
-        }
-        if (!"".equals(directivesPart)) {
-            sb.append(directivesPart);
-        }
-        return sb.toString();
-    }
-
-    private Manifest readOriginalManifest(Bundle bundle) {
-        URL manifestURL = bundle.getResource("/META-INF/MANIFEST.MF");
-        InputStream manifestStream = null;
-        try {
-            manifestStream = manifestURL.openStream();
-            return new Manifest(manifestStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (manifestStream != null) {
-                try {
-                    manifestStream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
-
-    private void copyBundleEntryIntoJar(Bundle bundle, String entry, JarOutputStream jarOut) throws IOException {
+    private void copyBundleEntryIntoJar(final Bundle bundle, final String entry, final JarOutputStream jarOut)
+            throws IOException {
         jarOut.putNextEntry(new ZipEntry(entry));
         URL resource = bundle.getResource(entry);
         InputStream in = resource.openStream();
@@ -176,8 +106,22 @@ public class EquinoxHackUtilImpl implements HackUtil {
         }
     }
 
-    private Manifest createHackedManifest(Bundle bundle, BundleDescription bundleDescription,
-            List<BundleCapability> availableCapabilities) {
+    private String createClauseString(final String namespace, final Map<String, Object> attributeMap,
+            final Map<String, String> directiveMap) {
+        String attributesPart = convertClauseFieldsToString(attributeMap, false);
+        String directivesPart = convertClauseFieldsToString(directiveMap, true);
+        StringBuilder sb = new StringBuilder(namespace);
+        if (!"".equals(attributesPart)) {
+            sb.append(attributesPart);
+        }
+        if (!"".equals(directivesPart)) {
+            sb.append(directivesPart);
+        }
+        return sb.toString();
+    }
+
+    private Manifest createHackedManifest(final Bundle bundle, final BundleDescription bundleDescription,
+            final List<BundleCapability> availableCapabilities) {
         List<BundleRequirement> declaredRequirements = bundleDescription.getDeclaredRequirements(null);
 
         Manifest manifest = readOriginalManifest(bundle);
@@ -216,8 +160,74 @@ public class EquinoxHackUtilImpl implements HackUtil {
         return manifest;
     }
 
-    private void hackImportPackageManifestHeader(BundleDescription bundleDescription,
-            List<BundleCapability> availableCapabilities, Attributes mainAttributes) {
+    private String escapeClauseValue(final Object object) {
+        String stringValue = String.valueOf(object);
+        return stringValue.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private List<BundleCapability> getAllCapabilities(final Bundle[] bundles, final State state) {
+        List<BundleCapability> availableCapabilities = new ArrayList<BundleCapability>();
+        for (Bundle bundle : bundles) {
+            BundleDescription bundleDescription = state.getBundle(bundle.getBundleId());
+            List<BundleCapability> declaredCapabilities = bundleDescription.getDeclaredCapabilities(null);
+            availableCapabilities.addAll(declaredCapabilities);
+        }
+        return availableCapabilities;
+    }
+
+    private void hackBundle(final Bundle bundle, final BundleDescription bundleDescription,
+            final List<BundleCapability> availableCapabilities) {
+        Manifest manifest = createHackedManifest(bundle, bundleDescription, availableCapabilities);
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        try {
+            JarOutputStream jarOut = new JarOutputStream(bout, manifest);
+            AbstractBundle abstractBundle = (AbstractBundle) bundle;
+            BaseData bundleData = (BaseData) abstractBundle.getBundleData();
+            BundleFile bundleFile = bundleData.getBundleFile();
+            BaseAdaptor adaptor = (BaseAdaptor) abstractBundle.getFramework().getAdaptor();
+
+            List<String> entries = adaptor.listEntryPaths(Arrays.asList(new BundleFile[] { bundleFile }), "/", null,
+                    BundleWiring.FINDENTRIES_RECURSE);
+
+            for (String entry : entries) {
+                if (!entry.equals("META-INF/MANIFEST.MF") && !entry.endsWith("/")) {
+                    copyBundleEntryIntoJar(bundle, entry, jarOut);
+                }
+            }
+            jarOut.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            bundle.update(new ByteArrayInputStream(bout.toByteArray()));
+        } catch (BundleException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void hackBundles(final Framework osgiContainer, final File tempDirectory) {
+        BundleContext systemBundleContext = osgiContainer.getBundleContext();
+
+        ServiceReference<PlatformAdmin> platformServiceSR = systemBundleContext
+                .getServiceReference(PlatformAdmin.class);
+
+        PlatformAdmin platformAdmin = systemBundleContext.getService(platformServiceSR);
+        State state = platformAdmin.getState();
+
+        Bundle[] bundles = systemBundleContext.getBundles();
+        List<BundleCapability> availableCapabilities = getAllCapabilities(bundles, state);
+        for (Bundle bundle : bundles) {
+            if (bundle.getState() == Bundle.INSTALLED) {
+                BundleDescription bundleDescription = state.getBundle(bundle.getBundleId());
+                hackBundle(bundle, bundleDescription, availableCapabilities);
+            }
+        }
+    }
+
+    private void hackImportPackageManifestHeader(final BundleDescription bundleDescription,
+            final List<BundleCapability> availableCapabilities, final Attributes mainAttributes) {
 
         StringBuilder hackedImportPackageSB = new StringBuilder();
 
@@ -248,8 +258,8 @@ public class EquinoxHackUtilImpl implements HackUtil {
         }
     }
 
-    private void hackRequireBundleManifestHeader(BundleDescription bundleDescription,
-            List<BundleCapability> availableCapabilities, Attributes mainAttributes) {
+    private void hackRequireBundleManifestHeader(final BundleDescription bundleDescription,
+            final List<BundleCapability> availableCapabilities, final Attributes mainAttributes) {
 
         StringBuilder hackedRequireBundleSB = new StringBuilder();
 
@@ -278,7 +288,27 @@ public class EquinoxHackUtilImpl implements HackUtil {
         }
     }
 
-    private boolean requirementSatisfiable(BundleRequirement requirement, List<BundleCapability> availableCapabilities) {
+    private Manifest readOriginalManifest(final Bundle bundle) {
+        URL manifestURL = bundle.getResource("/META-INF/MANIFEST.MF");
+        InputStream manifestStream = null;
+        try {
+            manifestStream = manifestURL.openStream();
+            return new Manifest(manifestStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (manifestStream != null) {
+                try {
+                    manifestStream.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    private boolean requirementSatisfiable(final BundleRequirement requirement,
+            final List<BundleCapability> availableCapabilities) {
         for (BundleCapability bundleCapability : availableCapabilities) {
             try {
                 if (requirement.matches(bundleCapability)) {
@@ -289,15 +319,5 @@ public class EquinoxHackUtilImpl implements HackUtil {
             }
         }
         return false;
-    }
-
-    private List<BundleCapability> getAllCapabilities(Bundle[] bundles, State state) {
-        List<BundleCapability> availableCapabilities = new ArrayList<BundleCapability>();
-        for (Bundle bundle : bundles) {
-            BundleDescription bundleDescription = state.getBundle(bundle.getBundleId());
-            List<BundleCapability> declaredCapabilities = bundleDescription.getDeclaredCapabilities(null);
-            availableCapabilities.addAll(declaredCapabilities);
-        }
-        return availableCapabilities;
     }
 }

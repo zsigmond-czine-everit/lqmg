@@ -27,7 +27,7 @@ public class ConfigValue<T extends AbstractNamingRuleType> {
 
     private final T namingRule;
 
-    public ConfigValue(T namingRule, Bundle bundle, String configurationXMLPath) {
+    public ConfigValue(final T namingRule, final Bundle bundle, final String configurationXMLPath) {
         this.namingRule = namingRule;
         this.bundle = bundle;
         this.configurationXMLPath = configurationXMLPath;

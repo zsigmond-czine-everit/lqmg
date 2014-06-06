@@ -57,7 +57,7 @@ public class GenerationProperties {
 
     /**
      * The simple constructor.
-     * 
+     *
      * @param capability
      *            A schema name with optional capability filter where liquibase should start searching for changesets.
      * @param targetFolder
@@ -66,15 +66,11 @@ public class GenerationProperties {
     public GenerationProperties(final String capability, final String[] bundleLocations, final String targetFolder) {
         this.targetFolder = targetFolder;
         this.bundleLocations = bundleLocations;
-        this.schema = capability;
+        schema = capability;
     }
 
     public String[] getBundleLocations() {
         return bundleLocations;
-    }
-
-    public String getSchema() {
-        return schema;
     }
 
     public String getConfigurationPath() {
@@ -85,19 +81,27 @@ public class GenerationProperties {
         return packages;
     }
 
+    public String getSchema() {
+        return schema;
+    }
+
     public String getTargetFolder() {
         return targetFolder;
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+    public boolean isHackWires() {
+        return hackWires;
     }
 
-    public void setConfigurationPath(String configurationPath) {
+    public void setConfigurationPath(final String configurationPath) {
         this.configurationPath = configurationPath;
     }
 
-    public void setPackages(String[] packages) {
+    public void setHackWires(final boolean strict) {
+        hackWires = strict;
+    }
+
+    public void setPackages(final String[] packages) {
         if (packages == null) {
             throw new IllegalArgumentException("Packages cannot be null. In case all packages should be included, a"
                     + " zero length array should be used.");
@@ -105,16 +109,12 @@ public class GenerationProperties {
         this.packages = packages;
     }
 
+    public void setSchema(final String schema) {
+        this.schema = schema;
+    }
+
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
-    }
-
-    public void setHackWires(boolean strict) {
-        this.hackWires = strict;
-    }
-
-    public boolean isHackWires() {
-        return hackWires;
     }
 
 }

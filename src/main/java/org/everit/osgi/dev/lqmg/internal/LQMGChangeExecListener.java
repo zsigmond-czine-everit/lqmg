@@ -41,20 +41,21 @@ public class LQMGChangeExecListener implements ChangeExecListener {
 
     private final ConfigurationContainer configurationContainer;
 
-    public LQMGChangeExecListener(ConfigurationContainer configurationContainer) {
+    public LQMGChangeExecListener(final ConfigurationContainer configurationContainer) {
         this.configurationContainer = configurationContainer;
     }
 
     @Override
-    public void preconditionErrored(PreconditionErrorException error, ErrorOption onError) {
+    public void preconditionErrored(final PreconditionErrorException error, final ErrorOption onError) {
     }
 
     @Override
-    public void preconditionFailed(PreconditionFailedException error, FailOption onFail) {
+    public void preconditionFailed(final PreconditionFailedException error, final FailOption onFail) {
     }
 
     @Override
-    public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
+    public void ran(final Change change, final ChangeSet changeSet, final DatabaseChangeLog changeLog,
+            final Database database) {
         if (!(change instanceof AbstractChange)) {
             throw new LQMGException("Change must be a descendant of AbstractChange: " + change.getClass().getName(),
                     null);
@@ -78,19 +79,22 @@ public class LQMGChangeExecListener implements ChangeExecListener {
     }
 
     @Override
-    public void ran(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ExecType execType) {
+    public void ran(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog, final Database database,
+            final ExecType execType) {
     }
 
     @Override
-    public void rolledBack(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+    public void rolledBack(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog, final Database database) {
     }
 
     @Override
-    public void willRun(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
+    public void willRun(final Change change, final ChangeSet changeSet, final DatabaseChangeLog changeLog,
+            final Database database) {
     }
 
     @Override
-    public void willRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, RunStatus runStatus) {
+    public void willRun(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog, final Database database,
+            final RunStatus runStatus) {
     }
 
 }

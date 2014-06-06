@@ -25,12 +25,12 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
 
     protected final ConfigurationContainer configurationContainer;
 
-    public LQMGNamingStrategy(ConfigurationContainer configurationContainer) {
+    public LQMGNamingStrategy(final ConfigurationContainer configurationContainer) {
         this.configurationContainer = configurationContainer;
     }
 
     @Override
-    public String getDefaultVariableName(EntityType entityType) {
+    public String getDefaultVariableName(final EntityType entityType) {
         String tableName = entityType.getData().get("table").toString();
         String schema = (String) entityType.getData().get("schema");
         String propertyName = configurationContainer.resolveClassName(schema, tableName, this);
@@ -52,10 +52,10 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
         propertyName = Character.toLowerCase(propertyName.charAt(0)) + propertyName.substring(1);
         return escape(entityType, propertyName);
     }
-    
+
     @Override
-    public String getPropertyNameForForeignKey(String fkName, EntityType entityType) {
-        
+    public String getPropertyNameForForeignKey(final String fkName, final EntityType entityType) {
+
         // TODO get it from lqmg table
         return getPropertyName(fkName, entityType);
     }

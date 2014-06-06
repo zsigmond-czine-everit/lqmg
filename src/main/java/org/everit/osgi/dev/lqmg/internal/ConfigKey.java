@@ -22,13 +22,13 @@ public class ConfigKey {
 
     private final String schemaName;
 
-    public ConfigKey(String schemaName, String entity) {
+    public ConfigKey(final String schemaName, final String entity) {
         this.schemaName = schemaName;
         this.entity = entity;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -68,8 +68,8 @@ public class ConfigKey {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((entity == null) ? 0 : entity.hashCode());
-        result = prime * result + ((schemaName == null) ? 0 : schemaName.hashCode());
+        result = (prime * result) + ((entity == null) ? 0 : entity.hashCode());
+        result = (prime * result) + ((schemaName == null) ? 0 : schemaName.hashCode());
         return result;
     }
 

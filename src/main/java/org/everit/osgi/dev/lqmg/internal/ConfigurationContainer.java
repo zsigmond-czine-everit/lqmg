@@ -80,14 +80,14 @@ public class ConfigurationContainer {
 
     public ConfigurationContainer() {
         try {
-            this.jaxbContext = JAXBContext.newInstance(LQMGType.class.getPackage().getName(), this.getClass()
+            jaxbContext = JAXBContext.newInstance(LQMGType.class.getPackage().getName(), this.getClass()
                     .getClassLoader());
         } catch (JAXBException e) {
             throw new LQMGException("Could not create JAXBContext for configuration", e);
         }
     }
 
-    public void addConfiguration(ConfigPath configPath) {
+    public void addConfiguration(final ConfigPath configPath) {
         if (!processedConfigs.add(configPath)) {
             // If the config file is already processed, just return
             return;
@@ -115,9 +115,9 @@ public class ConfigurationContainer {
         processLQMGType(lqmgType, resource, bundle);
     }
 
-    private <T extends AbstractNamingRuleType> void addValueToConfigMap(ConfigKey configKey,
-            ConfigValue<T> configValue,
-            Map<ConfigKey, ConfigValue<T>> configMap) {
+    private <T extends AbstractNamingRuleType> void addValueToConfigMap(final ConfigKey configKey,
+            final ConfigValue<T> configValue,
+            final Map<ConfigKey, ConfigValue<T>> configMap) {
 
         ConfigValue<? extends AbstractNamingRuleType> cachedValue = cache.get(configKey);
         if (cachedValue != null) {
@@ -146,7 +146,8 @@ public class ConfigurationContainer {
         configMap.put(configKey, configValue);
     }
 
-    public ConfigValue<? extends AbstractNamingRuleType> findConfigForEntity(String schemaName, String entityName) {
+    public ConfigValue<? extends AbstractNamingRuleType> findConfigForEntity(final String schemaName,
+            final String entityName) {
         ConfigKey configKey = new ConfigKey(schemaName, entityName);
         ConfigValue<? extends AbstractNamingRuleType> configValue = cache.get(configKey);
         if (configValue != null) {
@@ -171,44 +172,6 @@ public class ConfigurationContainer {
         }
 
         return findRegexRuleInMap(schemaName, entityName, regexRuleMap);
-    }
-
-    public String resolveClassName(String schemaName, String entityName, NamingStrategy namingStrategy) {
-        ConfigKey key = new ConfigKey(schemaName, entityName);
-        String className = classNameCache.get(key);
-        if (className != null) {
-            return className;
-        }
-        ConfigValue<? extends AbstractNamingRuleType> configValue = findConfigForEntity(schemaName, entityName);
-        if (configValue == null) {
-            return null;
-        }
-
-        AbstractNamingRuleType namingRule = configValue.getNamingRule();
-        if (namingRule instanceof RegexRuleType) {
-            RegexRuleType regexRule = (RegexRuleType) namingRule;
-            String regex = regexRule.getRegex();
-            String replacement = regexRule.getReplacement();
-            Pattern pattern = getPatternByRegex(regex);
-            Matcher matcher = pattern.matcher(entityName);
-            String replacedEntityName = matcher.replaceAll(replacement);
-            className = namingStrategy.getClassName(replacedEntityName);
-        } else if (namingRule instanceof ClassNameRuleType) {
-            className = ((ClassNameRuleType) namingRule).getClazz();
-        }
-
-        String prefix = namingRule.getPrefix();
-        if (prefix != null) {
-            className = prefix + className;
-        }
-
-        String suffix = namingRule.getSuffix();
-        if (suffix != null) {
-            className = className + suffix;
-        }
-
-        classNameCache.put(key, className);
-        return className;
     }
 
     private ConfigValue<ClassNameRuleType> findEntityConfigInMap(final String schemaName, final String entityName,
@@ -250,7 +213,7 @@ public class ConfigurationContainer {
         for (Entry<ConfigKey, ConfigValue<RegexRuleType>> entry : map.entrySet()) {
             ConfigValue<RegexRuleType> configValue = entry.getValue();
             RegexRuleType regexRule = configValue.getNamingRule();
-            if (regexRule.getSchema() == null && matches(regexRule.getRegex(), entityName)) {
+            if ((regexRule.getSchema() == null) && matches(regexRule.getRegex(), entityName)) {
                 result.add(configValue);
             }
         }
@@ -263,29 +226,7 @@ public class ConfigurationContainer {
         return null;
     }
 
-    private void throwMultipleMatchingRegexException(String schemaName, String entityName,
-            List<ConfigValue<RegexRuleType>> matchingConfigs) {
-
-        StringBuilder sb = new StringBuilder("Cannot decide which configuration should be applied to '")
-                .append(entityName).append("' entity of '").append(schemaName).append("' schema. Found matchings:\n");
-
-        for (ConfigValue<RegexRuleType> configValue : matchingConfigs) {
-            RegexRuleType namingRule = configValue.getNamingRule();
-            sb.append("  Bundle: ").append(configValue.getBundle()).append("; XMLPath: ")
-                    .append(configValue.getConfigurationXMLPath()).append("; Schema: ").append(namingRule.getSchema())
-                    .append("; Regex: ").append(namingRule.getRegex());
-        }
-        throw new LQMGException(sb.toString(), null);
-    }
-
-    private boolean matches(String regex, String value) {
-        Pattern pattern = getPatternByRegex(regex);
-        Matcher matcher = pattern.matcher(value);
-
-        return matcher.matches();
-    }
-
-    private Pattern getPatternByRegex(String regex) {
+    private Pattern getPatternByRegex(final String regex) {
         Pattern pattern = patternsByRegex.get(regex);
         if (pattern == null) {
             pattern = Pattern.compile(regex);
@@ -294,7 +235,14 @@ public class ConfigurationContainer {
         return pattern;
     }
 
-    private void processLQMGType(LQMGType lqmgType, String xmlConfigurationPath, Bundle bundle) {
+    private boolean matches(final String regex, final String value) {
+        Pattern pattern = getPatternByRegex(regex);
+        Matcher matcher = pattern.matcher(value);
+
+        return matcher.matches();
+    }
+
+    private void processLQMGType(final LQMGType lqmgType, final String xmlConfigurationPath, final Bundle bundle) {
         String defaultPackageName = lqmgType.getDefaultPackage();
         String defaultSchemaName = lqmgType.getDefaultSchema();
 
@@ -353,7 +301,60 @@ public class ConfigurationContainer {
         }
     }
 
-    private LQMGType unmarshalConfiguration(URL configurationURL) {
+    public String resolveClassName(final String schemaName, final String entityName, final NamingStrategy namingStrategy) {
+        ConfigKey key = new ConfigKey(schemaName, entityName);
+        String className = classNameCache.get(key);
+        if (className != null) {
+            return className;
+        }
+        ConfigValue<? extends AbstractNamingRuleType> configValue = findConfigForEntity(schemaName, entityName);
+        if (configValue == null) {
+            return null;
+        }
+
+        AbstractNamingRuleType namingRule = configValue.getNamingRule();
+        if (namingRule instanceof RegexRuleType) {
+            RegexRuleType regexRule = (RegexRuleType) namingRule;
+            String regex = regexRule.getRegex();
+            String replacement = regexRule.getReplacement();
+            Pattern pattern = getPatternByRegex(regex);
+            Matcher matcher = pattern.matcher(entityName);
+            String replacedEntityName = matcher.replaceAll(replacement);
+            className = namingStrategy.getClassName(replacedEntityName);
+        } else if (namingRule instanceof ClassNameRuleType) {
+            className = ((ClassNameRuleType) namingRule).getClazz();
+        }
+
+        String prefix = namingRule.getPrefix();
+        if (prefix != null) {
+            className = prefix + className;
+        }
+
+        String suffix = namingRule.getSuffix();
+        if (suffix != null) {
+            className = className + suffix;
+        }
+
+        classNameCache.put(key, className);
+        return className;
+    }
+
+    private void throwMultipleMatchingRegexException(final String schemaName, final String entityName,
+            final List<ConfigValue<RegexRuleType>> matchingConfigs) {
+
+        StringBuilder sb = new StringBuilder("Cannot decide which configuration should be applied to '")
+                .append(entityName).append("' entity of '").append(schemaName).append("' schema. Found matchings:\n");
+
+        for (ConfigValue<RegexRuleType> configValue : matchingConfigs) {
+            RegexRuleType namingRule = configValue.getNamingRule();
+            sb.append("  Bundle: ").append(configValue.getBundle()).append("; XMLPath: ")
+                    .append(configValue.getConfigurationXMLPath()).append("; Schema: ").append(namingRule.getSchema())
+                    .append("; Regex: ").append(namingRule.getRegex());
+        }
+        throw new LQMGException(sb.toString(), null);
+    }
+
+    private LQMGType unmarshalConfiguration(final URL configurationURL) {
         Unmarshaller unmarshaller;
         try {
             unmarshaller = jaxbContext.createUnmarshaller();
@@ -366,9 +367,9 @@ public class ConfigurationContainer {
         }
     }
 
-    private void validatePackage(ConfigValue<? extends AbstractNamingRuleType> configValue) {
+    private void validatePackage(final ConfigValue<? extends AbstractNamingRuleType> configValue) {
         AbstractNamingRuleType namingRule = configValue.getNamingRule();
-        if (namingRule.getPackage() != null && !namingRule.getPackage().trim().equals("")) {
+        if ((namingRule.getPackage() != null) && !namingRule.getPackage().trim().equals("")) {
             return;
         }
         StringBuilder sb = new StringBuilder("Missing java package: ConfigValue [bundle=")

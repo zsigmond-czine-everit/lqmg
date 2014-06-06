@@ -24,13 +24,13 @@ public class ConfigPath {
 
     private final String resource;
 
-    public ConfigPath(Bundle bundle, String resource) {
+    public ConfigPath(final Bundle bundle, final String resource) {
         this.bundle = bundle;
         this.resource = resource;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -70,8 +70,8 @@ public class ConfigPath {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((bundle == null) ? 0 : bundle.hashCode());
-        result = prime * result + ((resource == null) ? 0 : resource.hashCode());
+        result = (prime * result) + ((bundle == null) ? 0 : bundle.hashCode());
+        result = (prime * result) + ((resource == null) ? 0 : resource.hashCode());
         return result;
     }
 

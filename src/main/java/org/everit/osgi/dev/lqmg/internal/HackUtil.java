@@ -14,28 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.everit.osgi.dev.lqmg;
+package org.everit.osgi.dev.lqmg.internal;
 
-/**
- * The LiquiBase XML to QueryDSL metamodel generator exception.
- */
-public class LQMGException extends RuntimeException {
+import java.io.File;
 
-    /**
-     * Generated seriar version UID.
-     */
-    private static final long serialVersionUID = 4553681195568297655L;
+import org.osgi.framework.launch.Framework;
 
-    /**
-     * The simple constructor.
-     *
-     * @param msg
-     *            the error message.
-     * @param exception
-     *            the exception
-     */
-    public LQMGException(final String msg, final Throwable exception) {
-        super(msg, exception);
-    }
+public interface HackUtil {
+
+    void hackBundles(Framework osgiContainer, File tempDirectory);
 
 }

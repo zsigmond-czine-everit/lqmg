@@ -31,10 +31,11 @@ public class LQMGMain {
     public static final String ARG_PACKAGES = "packages";
     public static final String ARG_SCHEMA = "schema";
 
-    private static String evaluateMandatoryOptionValue(String key, CommandLine commandLine, Options options) {
+    private static String evaluateMandatoryOptionValue(final String key, final CommandLine commandLine,
+            final Options options) {
         String result = commandLine.getOptionValue(key);
         if (result == null) {
-            printHelp(options);
+            LQMGMain.printHelp(options);
             IllegalArgumentException e = new IllegalArgumentException("Missing mandatory argument: " + key);
             e.setStackTrace(new StackTraceElement[0]);
             throw e;
@@ -44,7 +45,7 @@ public class LQMGMain {
 
     /**
      * The command line processor.
-     * 
+     *
      * @param args
      *            the arguments.
      */
@@ -65,15 +66,15 @@ public class LQMGMain {
         try {
             commandLine = commandLineParser.parse(options, args, true);
         } catch (ParseException e) {
-            printHelp(options);
+            LQMGMain.printHelp(options);
             RuntimeException returnE = new RuntimeException(e);
             returnE.setStackTrace(new StackTraceElement[0]);
             throw returnE;
         }
 
-        String outputFolder = evaluateMandatoryOptionValue(ARG_OUTPUT_FOLDER, commandLine, options);
-        String bundles = evaluateMandatoryOptionValue(ARG_BUNDLES, commandLine, options);
-        String changelog = evaluateMandatoryOptionValue(ARG_SCHEMA, commandLine, options);
+        String outputFolder = LQMGMain.evaluateMandatoryOptionValue(ARG_OUTPUT_FOLDER, commandLine, options);
+        String bundles = LQMGMain.evaluateMandatoryOptionValue(ARG_BUNDLES, commandLine, options);
+        String changelog = LQMGMain.evaluateMandatoryOptionValue(ARG_SCHEMA, commandLine, options);
         String packages = commandLine.getOptionValue(ARG_PACKAGES);
         String configurationXMLPath = commandLine.getOptionValue(ARG_LQMG_CONFIG_XML);
 
@@ -83,11 +84,11 @@ public class LQMGMain {
         if (packages != null) {
             generationProps.setPackages(packages.split("\\,"));
         }
-        
+
         LQMG.generate(generationProps);
     }
 
-    private static void printHelp(Options options) {
+    private static void printHelp(final Options options) {
         HelpFormatter helperFormatter = new HelpFormatter();
         helperFormatter.printHelp("java -jar lqmg.jar", options);
     }

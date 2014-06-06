@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 import liquibase.Liquibase;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -39,7 +38,10 @@ import liquibase.resource.ResourceAccessor;
 
 import org.everit.osgi.dev.lqmg.internal.ConfigPath;
 import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
+import org.everit.osgi.dev.lqmg.internal.EquinoxHackUtilImpl;
+import org.everit.osgi.dev.lqmg.internal.HackUtil;
 import org.everit.osgi.dev.lqmg.internal.LQMGChangeExecListener;
+import org.everit.osgi.dev.lqmg.internal.LQMGDatabase;
 import org.everit.osgi.dev.lqmg.internal.LQMGMetadataExporter;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
@@ -101,7 +103,7 @@ public class LQMG {
     }
 
     private static void exportMetaData(final GenerationProperties parameters,
-            final Connection connection, ConfigurationContainer configContainer) throws SQLException {
+            final Connection connection, final ConfigurationContainer configContainer) throws SQLException {
         LOGGER.log(Level.INFO, "Start meta data export.");
         LQMGMetadataExporter metaDataExporter = new LQMGMetadataExporter(configContainer, parameters.getPackages());
 
@@ -112,7 +114,7 @@ public class LQMG {
 
     /**
      * Generate the JAVA classes to QueryDSL from LiquiBase XML.
-     * 
+     *
      * @param parameters
      *            the parameters for the generation. See more {@link GenerationProperties}.
      */
@@ -188,13 +190,11 @@ public class LQMG {
 
     }
 
-    private static void throwCapabilityNotFound(final GenerationProperties parameters, final Framework osgiContainer) {
+    private static void generateLQMGTables(final AbstractJdbcDatabase database) throws LiquibaseException {
+        Liquibase liquibase = new Liquibase("META-INF/lqmg.changelog.xml", new ClassLoaderResourceAccessor(
+                LQMG.class.getClassLoader()), database);
 
-        logUnresolvedBundles(osgiContainer);
-
-        throw new LQMGException(
-                "Could not find matching capability in any of the bundles for schema expression: "
-                        + parameters.getSchema(), null);
+        liquibase.update((String) null);
     }
 
     private static void logUnresolvedBundles(final Framework osgiContainer) {
@@ -242,6 +242,15 @@ public class LQMG {
         return framework;
     }
 
+    private static void throwCapabilityNotFound(final GenerationProperties parameters, final Framework osgiContainer) {
+
+        LQMG.logUnresolvedBundles(osgiContainer);
+
+        throw new LQMGException(
+                "Could not find matching capability in any of the bundles for schema expression: "
+                        + parameters.getSchema(), null);
+    }
+
     private static void tryCodeGeneration(
             final GenerationProperties parameters, final Bundle bundle,
             final BundleCapability bundleCapability) {
@@ -256,14 +265,14 @@ public class LQMG {
             LOGGER.log(Level.INFO, "Created connection.");
 
             LOGGER.log(Level.INFO, "Get database.");
-            AbstractJdbcDatabase database = new H2Database();
+            AbstractJdbcDatabase database = new LQMGDatabase();
             database.setConnection(new JdbcConnection(connection));
-            
-            generateLQMGTables(database);
+
+            LQMG.generateLQMGTables(database);
 
             LOGGER.log(Level.INFO, "Start LiquiBase and update.");
             Map<String, Object> attributes = bundleCapability.getAttributes();
-            
+
             ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle, attributes);
 
             String schemaResource = (String) attributes.get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
@@ -307,13 +316,6 @@ public class LQMG {
                 }
             }
         }
-    }
-
-    private static void generateLQMGTables(AbstractJdbcDatabase database) throws LiquibaseException {
-        Liquibase liquibase = new Liquibase("META-INF/lqmg.changelog.xml", new ClassLoaderResourceAccessor(
-                LQMG.class.getClassLoader()), database);
-        
-        liquibase.update((String) null); 
     }
 
     /**
