@@ -223,6 +223,7 @@ public class LQMG {
         config.put("osgi.sharedConfiguration.area", tempDirPath);
         config.put("osgi.instance.area", tempDirPath);
         config.put("osgi.user.area", tempDirPath);
+        config.put("osgi.hook.configurators.exclude", "org.eclipse.core.runtime.internal.adaptor.EclipseLogHook");
 
         Framework framework = frameworkFactory.newFramework(config);
         framework.start();
