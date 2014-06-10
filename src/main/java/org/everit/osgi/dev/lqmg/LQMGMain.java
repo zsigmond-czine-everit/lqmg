@@ -30,6 +30,7 @@ public class LQMGMain {
     public static final String ARG_OUTPUT_FOLDER = "outputFolder";
     public static final String ARG_PACKAGES = "packages";
     public static final String ARG_SCHEMA = "schema";
+    public static final String ARG_HACK_WIRES = "hackWires";
 
     private static String evaluateMandatoryOptionValue(final String key, final CommandLine commandLine,
             final Options options) {
@@ -60,6 +61,8 @@ public class LQMGMain {
                 + " generated");
         options.addOption("c", ARG_LQMG_CONFIG_XML, true, "Path of an optional configuration XML that can override"
                 + " configurations coming from the capabilities");
+        options.addOption("h", ARG_HACK_WIRES, true, "Whether to try redeploy bundles with unsatisfied constraintsin"
+                + " the way that their requirements are changed to be optional. Default: true");
 
         CommandLineParser commandLineParser = new BasicParser();
         CommandLine commandLine;
@@ -77,12 +80,18 @@ public class LQMGMain {
         String changelog = LQMGMain.evaluateMandatoryOptionValue(ARG_SCHEMA, commandLine, options);
         String packages = commandLine.getOptionValue(ARG_PACKAGES);
         String configurationXMLPath = commandLine.getOptionValue(ARG_LQMG_CONFIG_XML);
+        String hackWires = commandLine.getOptionValue(ARG_HACK_WIRES);
 
         GenerationProperties generationProps = new GenerationProperties(changelog, bundles.split("\\;"), outputFolder);
 
         generationProps.setConfigurationPath(configurationXMLPath);
+
         if (packages != null) {
             generationProps.setPackages(packages.split("\\,"));
+        }
+        
+        if (hackWires != null) {
+            generationProps.setHackWires(Boolean.valueOf(hackWires));
         }
 
         LQMG.generate(generationProps);
