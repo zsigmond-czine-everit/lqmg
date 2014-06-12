@@ -53,6 +53,7 @@ import com.mysema.query.sql.ColumnMetadata;
 import com.mysema.query.sql.Configuration;
 import com.mysema.query.sql.codegen.MetaDataSerializer;
 import com.mysema.query.sql.codegen.NamingStrategy;
+import com.mysema.query.sql.codegen.SQLCodegenModule;
 import com.mysema.query.sql.support.ForeignKeyData;
 import com.mysema.query.sql.support.InverseForeignKeyData;
 import com.mysema.query.sql.support.NotNullImpl;
@@ -86,6 +87,8 @@ public class LQMGMetadataExporter {
     protected NamingStrategy namingStrategy;
 
     private final LQMGKeyDataFactory keyDataFactory;
+
+    private boolean innerClassesForKeys;
 
     public LQMGMetadataExporter(final ConfigurationContainer configurationContainer, final String[] packages) {
         this.configurationContainer = configurationContainer;
@@ -124,6 +127,10 @@ public class LQMGMetadataExporter {
                 Collections.<String> emptyList(),
                 false);
     }
+    
+    public void setInnerClassesForKeys(boolean innerClassesForKeys) {
+        this.innerClassesForKeys = innerClassesForKeys;
+    }
 
     /**
      * Export the tables based on the given database metadata
@@ -133,7 +140,8 @@ public class LQMGMetadataExporter {
      */
     public void export(final DatabaseMetaData md) throws SQLException {
         typeMappings = new JavaTypeMappings();
-        serializer = new MetaDataSerializer(typeMappings, namingStrategy, false, Collections.<String> emptySet());
+        serializer = new MetaDataSerializer(typeMappings, namingStrategy, innerClassesForKeys,
+                Collections.<String> emptySet());
         configuration = Configuration.DEFAULT;
 
         List<String> types = new ArrayList<String>(2);

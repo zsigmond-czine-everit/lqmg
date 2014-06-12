@@ -54,6 +54,11 @@ public class GenerationProperties {
      * modified to be optional.
      */
     private boolean hackWires = true;
+    
+    /**
+     * If true, inner classes will be generated for foreign and primary keys.
+     */
+    private boolean innerClassesForKeys = true;
 
     /**
      * The simple constructor.
@@ -115,6 +120,14 @@ public class GenerationProperties {
 
     public void setTargetFolder(final String targetFolder) {
         this.targetFolder = targetFolder;
+    }
+    
+    public void setInnerClassesForKeys(boolean innerClassesForKeys) {
+        this.innerClassesForKeys = innerClassesForKeys;
+    }
+    
+    public boolean isInnerClassesForKeys() {
+        return innerClassesForKeys;
     }
 
 }

@@ -31,6 +31,7 @@ public class LQMGMain {
     public static final String ARG_PACKAGES = "packages";
     public static final String ARG_SCHEMA = "schema";
     public static final String ARG_HACK_WIRES = "hackWires";
+    public static final String ARG_INNER_CLASSES_FOR_KEYS = "innerClassesForKeys";
 
     private static String evaluateMandatoryOptionValue(final String key, final CommandLine commandLine,
             final Options options) {
@@ -63,6 +64,8 @@ public class LQMGMain {
                 + " configurations coming from the capabilities");
         options.addOption("h", ARG_HACK_WIRES, true, "Whether to try redeploy bundles with unsatisfied constraintsin"
                 + " the way that their requirements are changed to be optional. Default: true");
+        options.addOption("h", ARG_INNER_CLASSES_FOR_KEYS, true,
+                "Whether to generate inner classes for constraints. Default: true");
 
         CommandLineParser commandLineParser = new BasicParser();
         CommandLine commandLine;
@@ -81,6 +84,7 @@ public class LQMGMain {
         String packages = commandLine.getOptionValue(ARG_PACKAGES);
         String configurationXMLPath = commandLine.getOptionValue(ARG_LQMG_CONFIG_XML);
         String hackWires = commandLine.getOptionValue(ARG_HACK_WIRES);
+        String innerClassesForKeys = commandLine.getOptionValue(ARG_INNER_CLASSES_FOR_KEYS);
 
         GenerationProperties generationProps = new GenerationProperties(changelog, bundles.split("\\;"), outputFolder);
 
@@ -89,9 +93,13 @@ public class LQMGMain {
         if (packages != null) {
             generationProps.setPackages(packages.split("\\,"));
         }
-        
+
         if (hackWires != null) {
             generationProps.setHackWires(Boolean.valueOf(hackWires));
+        }
+        
+        if (innerClassesForKeys != null) {
+            generationProps.setHackWires(Boolean.valueOf(innerClassesForKeys));
         }
 
         LQMG.generate(generationProps);

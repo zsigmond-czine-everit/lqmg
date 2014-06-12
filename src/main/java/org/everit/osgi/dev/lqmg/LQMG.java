@@ -109,6 +109,7 @@ public class LQMG {
         LQMGMetadataExporter metaDataExporter = new LQMGMetadataExporter(configContainer, parameters.getPackages());
 
         metaDataExporter.setTargetFolder(new File(parameters.getTargetFolder()));
+        metaDataExporter.setInnerClassesForKeys(parameters.isInnerClassesForKeys());
         metaDataExporter.export(connection.getMetaData());
         LOGGER.log(Level.INFO, "Finish meta data export.");
     }
