@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import liquibase.Liquibase;
 import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
@@ -42,7 +43,6 @@ import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
 import org.everit.osgi.dev.lqmg.internal.EquinoxHackUtilImpl;
 import org.everit.osgi.dev.lqmg.internal.HackUtil;
 import org.everit.osgi.dev.lqmg.internal.LQMGChangeExecListener;
-import org.everit.osgi.dev.lqmg.internal.LQMGDatabase;
 import org.everit.osgi.dev.lqmg.internal.LQMGMetadataExporter;
 import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
@@ -282,7 +282,7 @@ public class LQMG {
             LOGGER.log(Level.INFO, "Created connection.");
 
             LOGGER.log(Level.INFO, "Get database.");
-            AbstractJdbcDatabase database = new LQMGDatabase();
+            AbstractJdbcDatabase database = new H2Database();
             database.setConnection(new JdbcConnection(connection));
 
             LOGGER.log(Level.INFO, "Start LiquiBase and update.");
