@@ -68,7 +68,6 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="defaultInnerClassesForKeys" type="xsd:boolean" default="true"></xsd:attribute>
     </xsd:complexType>
 
     <xsd:complexType name="ClassNameRuleType">
@@ -168,7 +167,6 @@
           <xsd:documentation>Suffix that will be added to the end of each metadata class name.</xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="innerClassesForKeys" type="xsd:boolean" use="optional"></xsd:attribute>
     </xsd:complexType>
 
 
