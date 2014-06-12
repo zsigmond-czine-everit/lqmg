@@ -24,8 +24,14 @@
       <replacement>$1Test</replacement>
     </regexRule>
     <classNameRule useSchema="true" package="org.everit.osgi.dev.lqmg.test.q2" suffix="Suffix">
-     <entity>car</entity>
-     <class>CarTT</class>
+      <entity>car</entity>
+      <class>CarTT</class>
+      <propertyMappings>
+        <column>
+          <name>color_</name>
+          <property>modifiedColor</property>
+        </column>
+      </propertyMappings>
     </classNameRule>
   </namingRules>
 </lqmg>

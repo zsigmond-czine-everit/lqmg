@@ -26,25 +26,27 @@ package org.everit.osgi.dev.lqmg.internal.schema.xml;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for NamingRulesType complex type.
+ * <p>Java class for PropertyMappingsType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="NamingRulesType">
+ * &lt;complexType name="PropertyMappingsType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence maxOccurs="unbounded">
- *         &lt;element name="classNameRule" type="{http://everit.org/lqmg}ClassNameRuleType" minOccurs="0"/>
- *         &lt;element name="regexRule" type="{http://everit.org/lqmg}RegexRuleType" minOccurs="0"/>
+ *         &lt;element name="primaryKey" type="{http://everit.org/lqmg}PropertyMappingType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="foreignKey" type="{http://everit.org/lqmg}PropertyMappingType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="column" type="{http://everit.org/lqmg}PropertyMappingType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -54,45 +56,47 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "NamingRulesType", propOrder = {
-    "classNameRuleAndRegexRule"
+@XmlType(name = "PropertyMappingsType", propOrder = {
+    "primaryKeyAndForeignKeyAndColumn"
 })
-public class NamingRulesType {
+public class PropertyMappingsType {
 
-    @XmlElements({
-        @XmlElement(name = "classNameRule", type = ClassNameRuleType.class),
-        @XmlElement(name = "regexRule", type = RegexRuleType.class)
+    @XmlElementRefs({
+        @XmlElementRef(name = "primaryKey", namespace = "http://everit.org/lqmg", type = JAXBElement.class, required = false),
+        @XmlElementRef(name = "foreignKey", namespace = "http://everit.org/lqmg", type = JAXBElement.class, required = false),
+        @XmlElementRef(name = "column", namespace = "http://everit.org/lqmg", type = JAXBElement.class, required = false)
     })
-    protected List<AbstractNamingRuleType> classNameRuleAndRegexRule;
+    protected List<JAXBElement<PropertyMappingType>> primaryKeyAndForeignKeyAndColumn;
 
     /**
-     * Gets the value of the classNameRuleAndRegexRule property.
+     * Gets the value of the primaryKeyAndForeignKeyAndColumn property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the classNameRuleAndRegexRule property.
+     * This is why there is not a <CODE>set</CODE> method for the primaryKeyAndForeignKeyAndColumn property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getClassNameRuleAndRegexRule().add(newItem);
+     *    getPrimaryKeyAndForeignKeyAndColumn().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ClassNameRuleType }
-     * {@link RegexRuleType }
+     * {@link JAXBElement }{@code <}{@link PropertyMappingType }{@code >}
+     * {@link JAXBElement }{@code <}{@link PropertyMappingType }{@code >}
+     * {@link JAXBElement }{@code <}{@link PropertyMappingType }{@code >}
      * 
      * 
      */
-    public List<AbstractNamingRuleType> getClassNameRuleAndRegexRule() {
-        if (classNameRuleAndRegexRule == null) {
-            classNameRuleAndRegexRule = new ArrayList<AbstractNamingRuleType>();
+    public List<JAXBElement<PropertyMappingType>> getPrimaryKeyAndForeignKeyAndColumn() {
+        if (primaryKeyAndForeignKeyAndColumn == null) {
+            primaryKeyAndForeignKeyAndColumn = new ArrayList<JAXBElement<PropertyMappingType>>();
         }
-        return this.classNameRuleAndRegexRule;
+        return this.primaryKeyAndForeignKeyAndColumn;
     }
 
 }

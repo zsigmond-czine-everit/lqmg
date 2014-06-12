@@ -18,6 +18,7 @@ package org.everit.osgi.dev.lqmg;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -33,9 +34,9 @@ import liquibase.Liquibase;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.everit.osgi.dev.lqmg.internal.ConfigPath;
 import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
 import org.everit.osgi.dev.lqmg.internal.EquinoxHackUtilImpl;
@@ -190,13 +191,6 @@ public class LQMG {
 
     }
 
-    private static void generateLQMGTables(final AbstractJdbcDatabase database) throws LiquibaseException {
-        Liquibase liquibase = new Liquibase("META-INF/lqmg.changelog.xml", new ClassLoaderResourceAccessor(
-                LQMG.class.getClassLoader()), database);
-
-        liquibase.update((String) null);
-    }
-
     private static void logUnresolvedBundles(final Framework osgiContainer) {
         BundleContext systemBundleContext = osgiContainer.getBundleContext();
         Bundle[] bundles = systemBundleContext.getBundles();
@@ -211,7 +205,7 @@ public class LQMG {
             }
         }
     }
-
+    
     private static Framework startOSGiContainer(final String[] bundleLocations, final String tempDirPath)
             throws BundleException {
         FrameworkFactory frameworkFactory = ServiceLoader
@@ -225,6 +219,7 @@ public class LQMG {
         config.put("osgi.user.area", tempDirPath);
         config.put("osgi.hook.configurators.exclude", "org.eclipse.core.runtime.internal.adaptor.EclipseLogHook");
 
+        resetFrameworkProperties();
         Framework framework = frameworkFactory.newFramework(config);
         framework.start();
 
@@ -241,6 +236,27 @@ public class LQMG {
         frameworkWiring.resolveBundles(null);
 
         return framework;
+    }
+
+    /**
+     * HACK to make Equinox using the classloader of the system even if LQMG is called multiple times.
+     */
+    private static void resetFrameworkProperties() {
+        // FIXME avoid having to do this hack!!! equinox internal classes should be available via the jvm classloader
+        Class<FrameworkProperties> clazz = FrameworkProperties.class;
+        try {
+            Field propertiesField = clazz.getDeclaredField("properties");
+            propertiesField.setAccessible(true);
+            propertiesField.set(null, null);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (SecurityException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void throwCapabilityNotFound(final GenerationProperties parameters, final Framework osgiContainer) {
@@ -268,8 +284,6 @@ public class LQMG {
             LOGGER.log(Level.INFO, "Get database.");
             AbstractJdbcDatabase database = new LQMGDatabase();
             database.setConnection(new JdbcConnection(connection));
-
-            LQMG.generateLQMGTables(database);
 
             LOGGER.log(Level.INFO, "Start LiquiBase and update.");
             Map<String, Object> attributes = bundleCapability.getAttributes();

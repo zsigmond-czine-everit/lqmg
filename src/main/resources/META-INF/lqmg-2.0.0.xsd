@@ -30,33 +30,52 @@
       </xsd:sequence>
       <xsd:attribute name="defaultSchema" type="xsd:string" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Default schema name filter. The value will be applied for each entity or namin rule in this XML if it is not defined there.</xsd:documentation>
+          <xsd:documentation>
+            Default schema name filter. The value will be applied for each entity or namin rule in this XML if it is not
+            defined there.
+          </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
       <xsd:attribute name="defaultPackage" type="xsd:string" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Default name of the java package.  The value will be applied for each entity or namin rule in this XML if it is not defined there.         </xsd:documentation>
+          <xsd:documentation>
+            Default name of the java package. The value will be applied for each entity or namin rule in this XML if it
+            is not defined there.
+          </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
       <xsd:attribute name="defaultUseSchema" type="xsd:boolean" use="optional" default="false">
         <xsd:annotation>
-          <xsd:documentation>Default value of useSchema. The value will be applied for each entity or namin rule in this XML if it is not defined there.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+          <xsd:documentation>
+            Default value of useSchema. The value will be applied for each entity or namin rule in this XML if it is not
+            defined there.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="defaultPrefix" type="xsd:string" default="Q" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Default metadata class prefix. The value will be applied for each entity or namin rule in this XML if it is not defined there.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+          <xsd:documentation>
+            Default metadata class prefix. The value will be applied for each entity or namin rule in this XML if it is
+            not defined there.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="defaultSuffix" type="xsd:string" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Default metadata class suffix. The value will be applied for each entity or namin rule in this XML if it is not defined there.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+          <xsd:documentation>
+            Default metadata class suffix. The value will be applied for each entity or namin rule in this XML if it is
+            not defined there.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="defaultInnerClassesForKeys" type="xsd:boolean" default="true"></xsd:attribute>
     </xsd:complexType>
 
     <xsd:complexType name="ClassNameRuleType">
       <xsd:complexContent>
         <xsd:extension base="tns:AbstractNamingRuleType">
 
-          <xsd:sequence>
+                <xsd:sequence>
             <xsd:element name="entity" type="xsd:string" minOccurs="1" maxOccurs="1">
               <xsd:annotation>
                 <xsd:documentation>Exact name of the entity that this rull will be applied to.</xsd:documentation>
@@ -69,7 +88,10 @@
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:element>
-          </xsd:sequence>
+            <xsd:sequence>
+          <xsd:element name="propertyMappings" type="tns:PropertyMappingsType" minOccurs="0" maxOccurs="1"></xsd:element>
+        </xsd:sequence>
+                </xsd:sequence>
 
 
 
@@ -114,26 +136,68 @@
       </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="AbstractNamingRuleType">
+    <xsd:complexType name="AbstractNamingRuleType">        
       <xsd:attribute name="schema" type="xsd:string" use="optional">
         <xsd:annotation>
-          <xsd:documentation>If schema name is defined, the rule will be applied only on entities that are coming from the specified schema. If there is a default schema specified, an empty string can define that there is no schema filter on this rule.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+          <xsd:documentation>
+            If schema name is defined, the rule will be applied only on entities that are coming from the specified
+            schema. If there is a default schema specified, an empty string can define that there is no schema filter on
+            this rule.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="package" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>The java package where the entities should be generated.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+        </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="useSchema" type="xsd:boolean" use="optional">
         <xsd:annotation>
-          <xsd:documentation>Whether to put the schema into the constructor of the metadata class or not.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+          <xsd:documentation>
+            Whether to put the schema into the constructor of the metadata class or not.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="prefix" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>Prefix that will be added to the beginning of the class.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+        </xsd:annotation>
+      </xsd:attribute>
       <xsd:attribute name="suffix" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>Suffix that will be added to the end of each metadata class name.</xsd:documentation>
-        </xsd:annotation></xsd:attribute>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="innerClassesForKeys" type="xsd:boolean" use="optional"></xsd:attribute>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="PropertyMappingType">
+      <xsd:sequence>
+        <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>Name of the constraint or column.</xsd:documentation>
+          </xsd:annotation></xsd:element>
+        <xsd:element name="property" type="xsd:string" minOccurs="1" maxOccurs="1">
+          <xsd:annotation>
+            <xsd:documentation>Name of the property that will be generated.</xsd:documentation>
+          </xsd:annotation></xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="ColumnMappingType">
+      <xsd:sequence>
+        <xsd:element name="column" type="xsd:string"></xsd:element>
+        <xsd:element name="property" type="xsd:string"></xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PropertyMappingsType">
+        <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+        <xsd:element name="primaryKey" type="tns:PropertyMappingType" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+        <xsd:element name="foreignKey" type="tns:PropertyMappingType" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+        <xsd:element name="column" type="tns:PropertyMappingType" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+      </xsd:sequence>
     </xsd:complexType>
 </xsd:schema>

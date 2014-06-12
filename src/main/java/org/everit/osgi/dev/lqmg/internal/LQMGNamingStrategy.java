@@ -16,12 +16,35 @@
  */
 package org.everit.osgi.dev.lqmg.internal;
 
+import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
+
 import org.everit.osgi.dev.lqmg.internal.schema.xml.AbstractNamingRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.ClassNameRuleType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.PropertyMappingType;
+import org.everit.osgi.dev.lqmg.internal.schema.xml.PropertyMappingsType;
 
 import com.mysema.query.codegen.EntityType;
 import com.mysema.query.sql.codegen.DefaultNamingStrategy;
 
 public class LQMGNamingStrategy extends DefaultNamingStrategy {
+
+    protected enum DBAttributeType {
+
+        COLUMN("column"), PRIMARY_KEY("primaryKey"), FOREIGN_KEY("foreignKey");
+
+        private DBAttributeType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        private String typeName;
+
+        public String getTypeName() {
+            return typeName;
+        }
+    }
 
     protected final ConfigurationContainer configurationContainer;
 
@@ -53,10 +76,97 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
         return escape(entityType, propertyName);
     }
 
-    @Override
-    public String getPropertyNameForForeignKey(final String fkName, final EntityType entityType) {
+    protected List<JAXBElement<PropertyMappingType>> getForeignKeyAndPrimaryKeyAndColumnForEntity(
+            final EntityType entityType) {
 
-        // TODO get it from lqmg table
-        return getPropertyName(fkName, entityType);
+        String tableName = entityType.getData().get("table").toString();
+        String schema = (String) entityType.getData().get("schema");
+        ConfigValue<? extends AbstractNamingRuleType> configValue = configurationContainer.findConfigForEntity(
+                schema, tableName);
+
+        if (configValue == null) {
+            return null;
+        }
+
+        AbstractNamingRuleType namingRule = configValue.getNamingRule();
+        if (!(namingRule instanceof ClassNameRuleType)) {
+            return null;
+        }
+
+        PropertyMappingsType propertyMappings = ((ClassNameRuleType) namingRule).getPropertyMappings();
+        if (propertyMappings == null) {
+            return null;
+        }
+
+        return propertyMappings.getPrimaryKeyAndForeignKeyAndColumn();
+    }
+
+    protected String getPropertyNameFromMapping(final String originalName, final EntityType entityType,
+            DBAttributeType dbAttributeType) {
+
+        List<JAXBElement<PropertyMappingType>> foreignKeyAndPrimaryKeyAndColumn =
+                getForeignKeyAndPrimaryKeyAndColumnForEntity(entityType);
+
+        if (foreignKeyAndPrimaryKeyAndColumn == null) {
+            return null;
+        }
+
+        PropertyMappingType selectedMapping = null;
+        Iterator<JAXBElement<PropertyMappingType>> iterator = foreignKeyAndPrimaryKeyAndColumn.iterator();
+        while (iterator.hasNext() && selectedMapping == null) {
+            JAXBElement<?> jaxbElement = iterator.next();
+            if (dbAttributeType.getTypeName().equals(jaxbElement.getName().getLocalPart())) {
+                PropertyMappingType propertyMapping = (PropertyMappingType) jaxbElement.getValue();
+                if (propertyMapping.getName().equals(originalName)) {
+                    selectedMapping = propertyMapping;
+                }
+            }
+        }
+
+        if (selectedMapping != null) {
+            return selectedMapping.getProperty();
+        } else {
+            return null;
+        }
+    }
+
+    protected String getSuperPropertyName(String columnName, EntityType entityType) {
+        return super.getPropertyName(columnName, entityType);
+    }
+
+    @Override
+    public String getPropertyName(String columnName, EntityType entityType) {
+        String propertyName = getPropertyNameFromMapping(columnName, entityType, DBAttributeType.COLUMN);
+        if (propertyName != null) {
+            return propertyName;
+        } else {
+            return super.getPropertyName(columnName, entityType);
+        }
+    }
+
+    @Override
+    public String getPropertyNameForForeignKey(String fkName, final EntityType entityType) {
+        String propertyName = getPropertyNameFromMapping(fkName, entityType, DBAttributeType.FOREIGN_KEY);
+        if (propertyName != null) {
+            return propertyName;
+        } else {
+            if (fkName.toLowerCase().startsWith("fk_")) {
+                fkName = fkName.substring(3) + "_" + fkName.substring(0, 2);
+            }
+            return getSuperPropertyName(fkName, entityType);
+        }
+    }
+
+    @Override
+    public String getPropertyNameForPrimaryKey(String pkName, EntityType entityType) {
+        String propertyName = getPropertyNameFromMapping(pkName, entityType, DBAttributeType.PRIMARY_KEY);
+        if (propertyName != null) {
+            return propertyName;
+        } else {
+            if (pkName.toLowerCase().startsWith("pk_")) {
+                pkName = pkName.substring(3) + "_" + pkName.substring(0, 2);
+            }
+            return getSuperPropertyName(pkName, entityType);
+        }
     }
 }

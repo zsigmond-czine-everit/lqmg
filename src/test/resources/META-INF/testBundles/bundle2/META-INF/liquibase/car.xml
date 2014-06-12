@@ -31,6 +31,7 @@
         <constraints primaryKey="true" nullable="false" />
       </column>
       <column name="platenumber" type="varchar(50)" />
+      <column name="color_" type="varchar(50)" />
       <column name="owner_id" type="bigint">
         <constraints foreignKeyName="fk_car_owner" referencedTableName="person" referencedColumnNames="person_id" />
       </column>

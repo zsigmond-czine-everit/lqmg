@@ -31,19 +31,19 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for RegexRuleType complex type.
+ * <p>Java class for ColumnMappingType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="RegexRuleType">
+ * &lt;complexType name="ColumnMappingType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://everit.org/lqmg}AbstractNamingRuleType">
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="regex" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="replacement" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="column" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="property" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
- *     &lt;/extension>
+ *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -51,65 +51,63 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "RegexRuleType", propOrder = {
-    "regex",
-    "replacement"
+@XmlType(name = "ColumnMappingType", propOrder = {
+    "column",
+    "property"
 })
-public class RegexRuleType
-    extends AbstractNamingRuleType
-{
+public class ColumnMappingType {
 
     @XmlElement(required = true)
-    protected String regex;
+    protected String column;
     @XmlElement(required = true)
-    protected String replacement;
+    protected String property;
 
     /**
-     * Gets the value of the regex property.
+     * Gets the value of the column property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getRegex() {
-        return regex;
+    public String getColumn() {
+        return column;
     }
 
     /**
-     * Sets the value of the regex property.
+     * Sets the value of the column property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setRegex(String value) {
-        this.regex = value;
+    public void setColumn(String value) {
+        this.column = value;
     }
 
     /**
-     * Gets the value of the replacement property.
+     * Gets the value of the property property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getReplacement() {
-        return replacement;
+    public String getProperty() {
+        return property;
     }
 
     /**
-     * Sets the value of the replacement property.
+     * Sets the value of the property property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setReplacement(String value) {
-        this.replacement = value;
+    public void setProperty(String value) {
+        this.property = value;
     }
 
 }
