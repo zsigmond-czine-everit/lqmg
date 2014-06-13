@@ -29,9 +29,10 @@ public class LQMGMain {
     public static final String ARG_LQMG_CONFIG_XML = "configurationXML";
     public static final String ARG_OUTPUT_FOLDER = "outputFolder";
     public static final String ARG_PACKAGES = "packages";
-    public static final String ARG_SCHEMA = "schema";
+    public static final String ARG_CAPABILITY = "capability";
     public static final String ARG_HACK_WIRES = "hackWires";
     public static final String ARG_INNER_CLASSES_FOR_KEYS = "innerClassesForKeys";
+    public static final String ARG_DEFAULT_SCHEMA = "defaultSchema";
 
     private static String evaluateMandatoryOptionValue(final String key, final CommandLine commandLine,
             final Options options) {
@@ -56,7 +57,7 @@ public class LQMGMain {
         options.addOption("b", ARG_BUNDLES, true, "Location to the bundles separated by semicolon");
         options.addOption("p", ARG_PACKAGES, true, "Package names separated by comma that should be generated."
                 + " If not defined, all packages will be generated.");
-        options.addOption("s", ARG_SCHEMA, true, "Expression that is used to select the first schema based on the"
+        options.addOption("cp", ARG_CAPABILITY, true, "Expression that is used to select the first schema based on the"
                 + " capabilities that are provided by the bundles.");
         options.addOption("o", ARG_OUTPUT_FOLDER, true, "Path of the folder where the classes should be"
                 + " generated");
@@ -66,6 +67,11 @@ public class LQMGMain {
                 + " the way that their requirements are changed to be optional. Default: true");
         options.addOption("h", ARG_INNER_CLASSES_FOR_KEYS, true,
                 "Whether to generate inner classes for constraints. Default: true");
+        options.addOption("ds", ARG_DEFAULT_SCHEMA, true,
+                "Default schema where tables will be generated. This schema will be passed in the constructor of"
+                + " the generated metadata classes where the liquibase changelog file does not contain"
+                + " schema information. It is recommended to define a unique value and use the runtime schema"
+                + " renaming functionality of QueryDSL.");
 
         CommandLineParser commandLineParser = new BasicParser();
         CommandLine commandLine;
@@ -80,15 +86,17 @@ public class LQMGMain {
 
         String outputFolder = LQMGMain.evaluateMandatoryOptionValue(ARG_OUTPUT_FOLDER, commandLine, options);
         String bundles = LQMGMain.evaluateMandatoryOptionValue(ARG_BUNDLES, commandLine, options);
-        String changelog = LQMGMain.evaluateMandatoryOptionValue(ARG_SCHEMA, commandLine, options);
+        String changelog = LQMGMain.evaluateMandatoryOptionValue(ARG_CAPABILITY, commandLine, options);
         String packages = commandLine.getOptionValue(ARG_PACKAGES);
         String configurationXMLPath = commandLine.getOptionValue(ARG_LQMG_CONFIG_XML);
         String hackWires = commandLine.getOptionValue(ARG_HACK_WIRES);
         String innerClassesForKeys = commandLine.getOptionValue(ARG_INNER_CLASSES_FOR_KEYS);
+        String defaultSchema = commandLine.getOptionValue(ARG_DEFAULT_SCHEMA);
 
         GenerationProperties generationProps = new GenerationProperties(changelog, bundles.split("\\;"), outputFolder);
 
         generationProps.setConfigurationPath(configurationXMLPath);
+        generationProps.setDefaultSchema(defaultSchema);
 
         if (packages != null) {
             generationProps.setPackages(packages.split("\\,"));

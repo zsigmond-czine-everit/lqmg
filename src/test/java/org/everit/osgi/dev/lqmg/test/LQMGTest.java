@@ -178,6 +178,7 @@ public class LQMGTest {
         GenerationProperties props = new GenerationProperties("simpleConfig", new String[] {
                 "reference:" + bundle2URL.toExternalForm(),
                 "reference:" + bundle1URL.toExternalForm() }, tempFolderName);
+        props.setDefaultSchema("org.test");
 
         props.setPackages(new String[] { "org.everit.osgi.dev.lqmg.test.q2" });
 

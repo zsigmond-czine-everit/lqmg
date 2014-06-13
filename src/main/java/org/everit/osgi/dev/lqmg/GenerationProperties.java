@@ -30,7 +30,12 @@ public class GenerationProperties {
      * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
      * userMgmt;filter:="(version=2)"
      */
-    private String schema;
+    private String capability;
+    
+    /**
+     * Default schema on SQL Connection to be used during generating tables.
+     */
+    private String defaultSchema;
 
     /**
      * Optional path of a configuration XML. In case this configuration exists, the rules in it are stronger than the
@@ -71,7 +76,7 @@ public class GenerationProperties {
     public GenerationProperties(final String capability, final String[] bundleLocations, final String targetFolder) {
         this.targetFolder = targetFolder;
         this.bundleLocations = bundleLocations;
-        schema = capability;
+        this.capability = capability;
     }
 
     public String[] getBundleLocations() {
@@ -86,8 +91,8 @@ public class GenerationProperties {
         return packages;
     }
 
-    public String getSchema() {
-        return schema;
+    public String getCapability() {
+        return capability;
     }
 
     public String getTargetFolder() {
@@ -114,8 +119,8 @@ public class GenerationProperties {
         this.packages = packages;
     }
 
-    public void setSchema(final String schema) {
-        this.schema = schema;
+    public void setCapability(final String schema) {
+        this.capability = schema;
     }
 
     public void setTargetFolder(final String targetFolder) {
@@ -129,5 +134,12 @@ public class GenerationProperties {
     public boolean isInnerClassesForKeys() {
         return innerClassesForKeys;
     }
-
+    
+    public void setDefaultSchema(String defaultSchema) {
+        this.defaultSchema = defaultSchema;
+    }
+    
+    public String getDefaultSchema() {
+        return defaultSchema;
+    }
 }

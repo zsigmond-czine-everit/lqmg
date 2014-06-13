@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import liquibase.Liquibase;
 import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.H2Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
@@ -128,7 +129,7 @@ public class LQMG {
             osgiContainer = LQMG.startOSGiContainer(parameters.getBundleLocations(), tempDirectory.getAbsolutePath());
 
             Map<Bundle, List<BundleCapability>> matchingBundles = LiquibaseOSGiUtil
-                    .findBundlesBySchemaExpression(parameters.getSchema(),
+                    .findBundlesBySchemaExpression(parameters.getCapability(),
                             osgiContainer.getBundleContext(), Bundle.RESOLVED);
 
             if (matchingBundles.size() == 0) {
@@ -139,7 +140,7 @@ public class LQMG {
                     frameworkWiring.resolveBundles(null);
 
                     matchingBundles = LiquibaseOSGiUtil
-                            .findBundlesBySchemaExpression(parameters.getSchema(),
+                            .findBundlesBySchemaExpression(parameters.getCapability(),
                                     osgiContainer.getBundleContext(), Bundle.RESOLVED);
                 } else {
                     LOGGER.severe("No matching bundle found. Probably setting hackWires to true would help");
@@ -151,7 +152,7 @@ public class LQMG {
             if (matchingBundles.size() > 1) {
                 LOGGER.log(Level.WARNING,
                         "Found multiple bundles containing matching capabilities for schema"
-                                + " expression: '" + parameters.getSchema()
+                                + " expression: '" + parameters.getCapability()
                                 + "'. Using the first one from list: "
                                 + matchingBundles.keySet().toString());
             }
@@ -206,7 +207,7 @@ public class LQMG {
             }
         }
     }
-    
+
     private static Framework startOSGiContainer(final String[] bundleLocations, final String tempDirPath)
             throws BundleException {
         FrameworkFactory frameworkFactory = ServiceLoader
@@ -266,7 +267,7 @@ public class LQMG {
 
         throw new LQMGException(
                 "Could not find matching capability in any of the bundles for schema expression: "
-                        + parameters.getSchema(), null);
+                        + parameters.getCapability(), null);
     }
 
     private static void tryCodeGeneration(
@@ -279,11 +280,19 @@ public class LQMG {
         Connection connection = null;
         try {
             LOGGER.log(Level.INFO, "Creating connection.");
-            connection = h2Driver.connect("jdbc:h2:mem:", new Properties());
+            String defaultSchema = parameters.getDefaultSchema();
+            String jdbcURL = createDataBaseURL(defaultSchema);
+            connection = h2Driver.connect(jdbcURL, new Properties());
             LOGGER.log(Level.INFO, "Created connection.");
 
             LOGGER.log(Level.INFO, "Get database.");
             AbstractJdbcDatabase database = new H2Database();
+            database.setCaseSensitive(true);
+            database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            database.setLiquibaseSchemaName("PUBLIC");
+            if (defaultSchema != null) {
+                database.setDefaultSchemaName(defaultSchema);
+            }
             database.setConnection(new JdbcConnection(connection));
 
             LOGGER.log(Level.INFO, "Start LiquiBase and update.");
@@ -319,7 +328,7 @@ public class LQMG {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new LQMGException(
                     "Error during processing XML file; "
-                            + parameters.getSchema(), e);
+                            + parameters.getCapability(), e);
         } finally {
             if (connection != null) {
                 try {
@@ -332,6 +341,15 @@ public class LQMG {
                 }
             }
         }
+    }
+
+    private static String createDataBaseURL(String defaultSchema) {
+        StringBuilder sb = new StringBuilder("jdbc:h2:mem:");
+        if (defaultSchema != null) {
+            sb.append(";INIT=CREATE SCHEMA IF NOT EXISTS \"").append(defaultSchema).append("\"\\;SET SCHEMA \"")
+                    .append(defaultSchema).append("\"");
+        }
+        return sb.toString();
     }
 
     /**
