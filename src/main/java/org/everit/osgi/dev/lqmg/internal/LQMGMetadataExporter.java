@@ -53,7 +53,6 @@ import com.mysema.query.sql.ColumnMetadata;
 import com.mysema.query.sql.Configuration;
 import com.mysema.query.sql.codegen.MetaDataSerializer;
 import com.mysema.query.sql.codegen.NamingStrategy;
-import com.mysema.query.sql.codegen.SQLCodegenModule;
 import com.mysema.query.sql.support.ForeignKeyData;
 import com.mysema.query.sql.support.InverseForeignKeyData;
 import com.mysema.query.sql.support.NotNullImpl;
@@ -110,9 +109,7 @@ public class LQMGMetadataExporter {
         classModel = new EntityType(classTypeModel);
         typeMappings.register(classModel, classModel);
 
-        if ((namingRule != null) && namingRule.isUseSchema()) {
-            classModel.getData().put("schema", schemaName);
-        }
+        classModel.getData().put("schema", schemaName);
         classModel.getData().put("table", tableName);
         return classModel;
     }

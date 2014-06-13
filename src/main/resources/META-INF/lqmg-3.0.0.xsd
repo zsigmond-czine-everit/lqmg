@@ -44,14 +44,6 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
-      <xsd:attribute name="defaultUseSchema" type="xsd:boolean" use="optional" default="false">
-        <xsd:annotation>
-          <xsd:documentation>
-            Default value of useSchema. The value will be applied for each entity or namin rule in this XML if it is not
-            defined there.
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:attribute>
       <xsd:attribute name="defaultPrefix" type="xsd:string" default="Q" use="optional">
         <xsd:annotation>
           <xsd:documentation>
@@ -148,13 +140,6 @@
       <xsd:attribute name="package" type="xsd:string" use="optional">
         <xsd:annotation>
           <xsd:documentation>The java package where the entities should be generated.</xsd:documentation>
-        </xsd:annotation>
-      </xsd:attribute>
-      <xsd:attribute name="useSchema" type="xsd:boolean" use="optional">
-        <xsd:annotation>
-          <xsd:documentation>
-            Whether to put the schema into the constructor of the metadata class or not.
-          </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
       <xsd:attribute name="prefix" type="xsd:string" use="optional">

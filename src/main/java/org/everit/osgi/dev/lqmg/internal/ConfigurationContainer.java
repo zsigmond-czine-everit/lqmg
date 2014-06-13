@@ -258,10 +258,6 @@ public class ConfigurationContainer {
                     lqmgAbstractEntity.setSchema(defaultSchemaName);
                 }
 
-                if (lqmgAbstractEntity.isUseSchema() == null) {
-                    lqmgAbstractEntity.setUseSchema(lqmgType.isDefaultUseSchema());
-                }
-
                 if (lqmgAbstractEntity.getPrefix() == null) {
                     lqmgAbstractEntity.setPrefix(lqmgType.getDefaultPrefix());
                 }
