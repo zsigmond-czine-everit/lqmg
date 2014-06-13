@@ -223,7 +223,7 @@ public class LQMGTest {
             File configFile = new File(testDirFile, "config.xml");
             URL globalConfigURL = this.getClass().getResource("/META-INF/global.2.lqmg.xml");
             FileUtils.copyURLToFile(globalConfigURL, configFile);
-            LQMGMain.main(new String[] { "-s", "simpleConfig", "-b", bundleLocations, "-c",
+            LQMGMain.main(new String[] { "-cp", "simpleConfig", "-b", bundleLocations, "-c",
                     configFile.getAbsolutePath(), "-p", "org.everit.osgi.dev.lqmg.test.q2", "-o", tempFolderName });
             // TODO check if generated classes are ok.
         } catch (IOException e) {
