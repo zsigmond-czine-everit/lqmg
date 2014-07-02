@@ -30,7 +30,7 @@
 
   <groupId>org.everit.osgi.dev</groupId>
   <artifactId>org.everit.osgi.dev.lqmg</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <packaging>jar</packaging>
   <name>Everit - Liquibase-QueryDSL Model Generator</name>
   <description>
@@ -40,8 +40,8 @@
 
   <properties>
     <projectpath>osgi-lqmg</projectpath>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
   <scm>
@@ -249,7 +249,7 @@
     <dependency>
       <groupId>org.everit.osgi</groupId>
       <artifactId>org.everit.osgi.liquibase.bundle</artifactId>
-      <version>3.1.1-v20140324</version>
+      <version>3.1.1-v20140507</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.util.bundles</groupId>
@@ -287,11 +287,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.6</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.2.11</version>
     </dependency>
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
