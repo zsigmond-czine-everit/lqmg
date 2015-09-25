@@ -16,15 +16,25 @@
     limitations under the License.
 
 -->
-<lqmg xmlns="http://everit.org/lqmg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" defaultPackage="org.everit.osgi.dev.lqmg.test.q">
-  <namingRules>
-    <regexRule>
-      <regex>(.*)</regex>
-      <replacement>$1</replacement>
-    </regexRule>
-    <classNameRule useSchema="true" package="org.everit.osgi.dev.lqmg.test.q2">
-     <entity>car</entity>
-     <class>Car</class>
-    </classNameRule>
-  </namingRules>
-</lqmg>
+<FindBugsFilter>
+  <Match>
+    <Package name="~org\.everit\.osgi\.dev\.lqmg\.internal\.schema\.xml.*" />
+  </Match>
+  <Match>
+    <Class name="~org\.everit\.osgi\.dev\.lqmg\.internal\.LQMG.*" />
+  </Match>
+  <Match>
+    <Bug
+      pattern="
+        UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR,
+        NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE,
+        URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD,
+        SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING,
+        EI_EXPOSE_REP2,
+        IS2_INCONSISTENT_SYNC,
+        MSF_MUTABLE_SERVLET_FIELD,
+        MTIA_SUSPECT_SERVLET_INSTANCE_FIELD,
+        BC_UNCONFIRMED_CAST
+        " />
+  </Match>
+</FindBugsFilter>

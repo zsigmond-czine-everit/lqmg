@@ -1,18 +1,17 @@
-/**
- * This file is part of Everit - Liquibase-QueryDSL Model Generator.
+/*
+ * Copyright (C) 2011 Everit Kft. (http://www.everit.biz)
  *
- * Everit - Liquibase-QueryDSL Model Generator is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Everit - Liquibase-QueryDSL Model Generator is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.everit.osgi.dev.lqmg;
 
@@ -21,125 +20,102 @@ package org.everit.osgi.dev.lqmg;
  */
 public class GenerationProperties {
 
-    /**
-     * The paths to the bundles (directory path of jar file path).
-     */
-    private final String[] bundleLocations;
+  /**
+   * The paths to the bundles (directory path of jar file path).
+   */
+  public final String[] bundleLocations;
 
-    /**
-     * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
-     * userMgmt;filter:="(version=2)"
-     */
-    private String capability;
-    
-    /**
-     * Default schema on SQL Connection to be used during generating tables.
-     */
-    private String defaultSchema;
+  /**
+   * A schema name with optional filter expression that points to a bundle schema capability. E.g.:
+   * userMgmt;filter:="(version=2)"
+   */
+  public String capability;
 
-    /**
-     * Optional path of a configuration XML. In case this configuration exists, the rules in it are stronger than the
-     * rules specified at the capability attributes in the bundles.
-     */
-    private String configurationPath;
+  /**
+   * Optional path of a configuration XML. In case this configuration exists, the rules in it are
+   * stronger than the rules specified at the capability attributes in the bundles.
+   */
+  public String configurationPath;
 
-    /**
-     * Comma separated list of java packages that should be generated. Null means that all packages should be generated.
-     * Classes for tables coming from Liquibase (changelog and lock tables) are never generated.
-     */
-    private String[] packages = new String[0];
+  /**
+   * Default schema on SQL Connection to be used during generating tables.
+   */
+  public String defaultSchema;
 
-    /**
-     * The folder where source will be generated to.
-     */
-    private String targetFolder;
+  /**
+   * If true, LQMG will update the unresolved bundles in the way that all of their unsatisfied
+   * requirements will be modified to be optional.
+   */
+  public boolean hackWires = true;
 
-    /**
-     * If true, LQMG will update the unresolved bundles in the way that all of their unsatisfied requirements will be
-     * modified to be optional.
-     */
-    private boolean hackWires = true;
-    
-    /**
-     * If true, inner classes will be generated for foreign and primary keys.
-     */
-    private boolean innerClassesForKeys = true;
+  /**
+   * If true, inner classes will be generated for foreign and primary keys.
+   */
+  public boolean innerClassesForKeys = true;
 
-    /**
-     * The simple constructor.
-     *
-     * @param capability
-     *            A schema name with optional capability filter where liquibase should start searching for changesets.
-     * @param targetFolder
-     *            the folder where source will be generated to.
-     */
-    public GenerationProperties(final String capability, final String[] bundleLocations, final String targetFolder) {
-        this.targetFolder = targetFolder;
-        this.bundleLocations = bundleLocations;
-        this.capability = capability;
+  /**
+   * Comma separated list of java packages that should be generated. Null means that all packages
+   * should be generated. Classes for tables coming from Liquibase (changelog and lock tables) are
+   * never generated.
+   */
+  public String[] packages = new String[0];
+
+  /**
+   * The folder where source will be generated to.
+   */
+  public String targetFolder;
+
+  /**
+   * The simple constructor.
+   *
+   * @param capability
+   *          A schema name with optional capability filter where liquibase should start searching
+   *          for changesets.
+   * @param targetFolder
+   *          the folder where source will be generated to.
+   */
+  public GenerationProperties(final String capability, final String[] bundleLocations,
+      final String targetFolder) {
+    this.targetFolder = targetFolder;
+    this.bundleLocations = bundleLocations;
+    this.capability = capability;
+  }
+
+  public void setCapability(final String schema) {
+    capability = schema;
+  }
+
+  public void setConfigurationPath(final String configurationPath) {
+    this.configurationPath = configurationPath;
+  }
+
+  public void setDefaultSchema(final String defaultSchema) {
+    this.defaultSchema = defaultSchema;
+  }
+
+  public void setHackWires(final boolean strict) {
+    hackWires = strict;
+  }
+
+  public void setInnerClassesForKeys(final boolean innerClassesForKeys) {
+    this.innerClassesForKeys = innerClassesForKeys;
+  }
+
+  public void setPackages(final String[] packages) {
+    validatePackages(packages);
+    this.packages = packages;
+  }
+
+  public void setTargetFolder(final String targetFolder) {
+    this.targetFolder = targetFolder;
+  }
+
+  private void validatePackages(final String[] packages) {
+    if (packages == null) {
+      throw new IllegalArgumentException(
+          "Packages cannot be null. In case all packages should be included, a"
+              + " zero length array should be used.");
     }
+  }
 
-    public String[] getBundleLocations() {
-        return bundleLocations;
-    }
-
-    public String getConfigurationPath() {
-        return configurationPath;
-    }
-
-    public String[] getPackages() {
-        return packages;
-    }
-
-    public String getCapability() {
-        return capability;
-    }
-
-    public String getTargetFolder() {
-        return targetFolder;
-    }
-
-    public boolean isHackWires() {
-        return hackWires;
-    }
-
-    public void setConfigurationPath(final String configurationPath) {
-        this.configurationPath = configurationPath;
-    }
-
-    public void setHackWires(final boolean strict) {
-        hackWires = strict;
-    }
-
-    public void setPackages(final String[] packages) {
-        if (packages == null) {
-            throw new IllegalArgumentException("Packages cannot be null. In case all packages should be included, a"
-                    + " zero length array should be used.");
-        }
-        this.packages = packages;
-    }
-
-    public void setCapability(final String schema) {
-        this.capability = schema;
-    }
-
-    public void setTargetFolder(final String targetFolder) {
-        this.targetFolder = targetFolder;
-    }
-    
-    public void setInnerClassesForKeys(boolean innerClassesForKeys) {
-        this.innerClassesForKeys = innerClassesForKeys;
-    }
-    
-    public boolean isInnerClassesForKeys() {
-        return innerClassesForKeys;
-    }
-    
-    public void setDefaultSchema(String defaultSchema) {
-        this.defaultSchema = defaultSchema;
-    }
-    
-    public String getDefaultSchema() {
-        return defaultSchema;
-    }
 }
