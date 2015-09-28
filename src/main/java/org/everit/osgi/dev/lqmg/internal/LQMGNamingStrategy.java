@@ -46,7 +46,7 @@ import com.querydsl.sql.codegen.support.ForeignKeyData;
  * Customized {@link com.querydsl.sql.codegen.NamingStrategy} for LQMG.
  */
 public class LQMGNamingStrategy extends DefaultNamingStrategy {
-
+  //
   /**
    * Constants for DB attributes.
    */
