@@ -191,7 +191,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <!-- TODO remove LQMG check exlusions -->
-          <excludes>org/everit/osgi/dev/lqmg/internal/schema/xml/*,org/everit/osgi/dev/lqmg/internal/LQMG*</excludes>
+          <excludes>org/everit/osgi/dev/lqmg/internal/schema/xml/*,org/everit/osgi/dev/lqmg/internal/liquibase/*</excludes>
         </configuration>
       </plugin>
       <plugin>
@@ -254,9 +254,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-sql-codegen</artifactId>
-      <version>3.3.1</version>
+      <version>4.0.4.BUILD-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>

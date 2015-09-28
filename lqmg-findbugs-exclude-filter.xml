@@ -21,7 +21,7 @@
     <Package name="~org\.everit\.osgi\.dev\.lqmg\.internal\.schema\.xml.*" />
   </Match>
   <Match>
-    <Class name="~org\.everit\.osgi\.dev\.lqmg\.internal\.LQMG.*" />
+    <Class name="~org\.everit\.osgi\.dev\.lqmg\.internal\.liquibase\.*" />
   </Match>
   <Match>
     <Bug
