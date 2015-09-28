@@ -1,78 +1,76 @@
-/**
- * This file is part of Everit - Liquibase-QueryDSL Model Generator.
+/*
+ * Copyright (C) 2011 Everit Kft. (http://www.everit.biz)
  *
- * Everit - Liquibase-QueryDSL Model Generator is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Everit - Liquibase-QueryDSL Model Generator is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.everit.osgi.dev.lqmg.internal;
 
+import javax.annotation.Generated;
+
 import org.osgi.framework.Bundle;
 
+/**
+ * DTO for configuration path.
+ */
 public class ConfigPath {
 
-    private final Bundle bundle;
+  public final Bundle bundle;
 
-    private final String resource;
+  public final String resource;
 
-    public ConfigPath(final Bundle bundle, final String resource) {
-        this.bundle = bundle;
-        this.resource = resource;
+  public ConfigPath(final Bundle bundle, final String resource) {
+    this.bundle = bundle;
+    this.resource = resource;
+  }
+
+  @Generated("Generated with Eclipse")
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ConfigPath other = (ConfigPath) obj;
-        if (bundle == null) {
-            if (other.bundle != null) {
-                return false;
-            }
-        } else if (!bundle.equals(other.bundle)) {
-            return false;
-        }
-        if (resource == null) {
-            if (other.resource != null) {
-                return false;
-            }
-        } else if (!resource.equals(other.resource)) {
-            return false;
-        }
-        return true;
+    if (obj == null) {
+      return false;
     }
-
-    public Bundle getBundle() {
-        return bundle;
+    if (getClass() != obj.getClass()) {
+      return false;
     }
-
-    public String getResource() {
-        return resource;
+    ConfigPath other = (ConfigPath) obj;
+    if (bundle == null) {
+      if (other.bundle != null) {
+        return false;
+      }
+    } else if (!bundle.equals(other.bundle)) {
+      return false;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((bundle == null) ? 0 : bundle.hashCode());
-        result = (prime * result) + ((resource == null) ? 0 : resource.hashCode());
-        return result;
+    if (resource == null) {
+      if (other.resource != null) {
+        return false;
+      }
+    } else if (!resource.equals(other.resource)) {
+      return false;
     }
+    return true;
+  }
+
+  @Generated("Generated with Eclipse")
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + ((bundle == null) ? 0 : bundle.hashCode());
+    result = (prime * result) + ((resource == null) ? 0 : resource.hashCode());
+    return result;
+  }
 
 }

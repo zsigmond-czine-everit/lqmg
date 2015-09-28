@@ -1,82 +1,80 @@
-/**
- * This file is part of Everit - Liquibase-QueryDSL Model Generator.
+/*
+ * Copyright (C) 2011 Everit Kft. (http://www.everit.biz)
  *
- * Everit - Liquibase-QueryDSL Model Generator is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Everit - Liquibase-QueryDSL Model Generator is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.everit.osgi.dev.lqmg.internal;
 
 import java.util.Map;
 
+import javax.annotation.Generated;
+
 import org.osgi.framework.Bundle;
 
+/**
+ * DTO for holding {@link Bundle} and its attributes together.
+ */
 public class BundleWithAttributes {
 
-    private final Bundle bundle;
+  public final Map<String, Object> attributes;
 
-    private final Map<String, Object> attributes;
+  public final Bundle bundle;
 
-    public BundleWithAttributes(final Bundle bundle, final Map<String, Object> attributes) {
-        this.bundle = bundle;
-        this.attributes = attributes;
+  public BundleWithAttributes(final Bundle bundle, final Map<String, Object> attributes) {
+    this.bundle = bundle;
+    this.attributes = attributes;
+  }
+
+  @Generated("Generated with Eclipse")
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        BundleWithAttributes other = (BundleWithAttributes) obj;
-        if (attributes == null) {
-            if (other.attributes != null) {
-                return false;
-            }
-        } else if (!attributes.equals(other.attributes)) {
-            return false;
-        }
-        if (bundle == null) {
-            if (other.bundle != null) {
-                return false;
-            }
-        } else if (other.bundle == null) {
-            return false;
-        } else if (bundle.getBundleId() != other.bundle.getBundleId()) {
-            return false;
-        }
-        return true;
+    if (obj == null) {
+      return false;
     }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
+    if (getClass() != obj.getClass()) {
+      return false;
     }
-
-    public Bundle getBundle() {
-        return bundle;
+    BundleWithAttributes other = (BundleWithAttributes) obj;
+    if (attributes == null) {
+      if (other.attributes != null) {
+        return false;
+      }
+    } else if (!attributes.equals(other.attributes)) {
+      return false;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((attributes == null) ? 0 : attributes.hashCode());
-        result = (prime * result) + ((bundle == null) ? 0 : (int) bundle.getBundleId());
-        return result;
+    if (bundle == null) {
+      if (other.bundle != null) {
+        return false;
+      }
+    } else if (other.bundle == null) {
+      return false;
+    } else if (bundle.getBundleId() != other.bundle.getBundleId()) {
+      return false;
     }
+    return true;
+  }
+
+  @Generated("Generated with Eclipse")
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + ((attributes == null) ? 0 : attributes.hashCode());
+    result = (prime * result) + ((bundle == null) ? 0 : (int) bundle.getBundleId());
+    return result;
+  }
 
 }

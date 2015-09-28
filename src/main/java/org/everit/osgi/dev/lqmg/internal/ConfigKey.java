@@ -1,81 +1,80 @@
-/**
- * This file is part of Everit - Liquibase-QueryDSL Model Generator.
+/*
+ * Copyright (C) 2011 Everit Kft. (http://www.everit.biz)
  *
- * Everit - Liquibase-QueryDSL Model Generator is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Everit - Liquibase-QueryDSL Model Generator is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Everit - Liquibase-QueryDSL Model Generator.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.everit.osgi.dev.lqmg.internal;
 
+import javax.annotation.Generated;
+
+/**
+ * DTO for configuration keys.
+ */
 public class ConfigKey {
 
-    private final String entity;
+  public final String entity;
 
-    private final String schemaName;
+  public final String schemaName;
 
-    public ConfigKey(final String schemaName, final String entity) {
-        this.schemaName = schemaName;
-        this.entity = entity;
+  public ConfigKey(final String schemaName, final String entity) {
+    this.schemaName = schemaName;
+    this.entity = entity;
+  }
+
+  @Generated("Generated with Eclipse")
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ConfigKey other = (ConfigKey) obj;
-        if (entity == null) {
-            if (other.entity != null) {
-                return false;
-            }
-        } else if (!entity.equals(other.entity)) {
-            return false;
-        }
-        if (schemaName == null) {
-            if (other.schemaName != null) {
-                return false;
-            }
-        } else if (!schemaName.equals(other.schemaName)) {
-            return false;
-        }
-        return true;
+    if (obj == null) {
+      return false;
     }
-
-    public String getEntity() {
-        return entity;
+    if (getClass() != obj.getClass()) {
+      return false;
     }
-
-    public String getSchemaName() {
-        return schemaName;
+    ConfigKey other = (ConfigKey) obj;
+    if (entity == null) {
+      if (other.entity != null) {
+        return false;
+      }
+    } else if (!entity.equals(other.entity)) {
+      return false;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((entity == null) ? 0 : entity.hashCode());
-        result = (prime * result) + ((schemaName == null) ? 0 : schemaName.hashCode());
-        return result;
+    if (schemaName == null) {
+      if (other.schemaName != null) {
+        return false;
+      }
+    } else if (!schemaName.equals(other.schemaName)) {
+      return false;
     }
+    return true;
+  }
 
-    @Override
-    public String toString() {
-        return "ConfigKey [schemaName=" + schemaName + ", entity=" + entity + "]";
-    }
+  @Generated("Generated with Eclipse")
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + ((entity == null) ? 0 : entity.hashCode());
+    result = (prime * result) + ((schemaName == null) ? 0 : schemaName.hashCode());
+    return result;
+  }
+
+  @Generated("Generated with Eclipse")
+  @Override
+  public String toString() {
+    return "ConfigKey [schemaName=" + schemaName + ", entity=" + entity + "]";
+  }
 
 }
