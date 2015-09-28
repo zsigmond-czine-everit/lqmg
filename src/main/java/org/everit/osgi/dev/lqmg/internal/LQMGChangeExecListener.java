@@ -17,6 +17,11 @@ package org.everit.osgi.dev.lqmg.internal;
 
 import java.util.Map;
 
+import org.everit.osgi.dev.lqmg.LQMG;
+import org.everit.osgi.dev.lqmg.LQMGException;
+import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
+import org.osgi.framework.Bundle;
+
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -31,69 +36,70 @@ import liquibase.precondition.core.PreconditionContainer.ErrorOption;
 import liquibase.precondition.core.PreconditionContainer.FailOption;
 import liquibase.resource.ResourceAccessor;
 
-import org.everit.osgi.dev.lqmg.LQMG;
-import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
-import org.osgi.framework.Bundle;
-
 public class LQMGChangeExecListener implements ChangeExecListener {
 
-    private final ConfigurationContainer configurationContainer;
+  private final ConfigurationContainer configurationContainer;
 
-    public LQMGChangeExecListener(final ConfigurationContainer configurationContainer) {
-        this.configurationContainer = configurationContainer;
+  public LQMGChangeExecListener(final ConfigurationContainer configurationContainer) {
+    this.configurationContainer = configurationContainer;
+  }
+
+  @Override
+  public void preconditionErrored(final PreconditionErrorException error,
+      final ErrorOption onError) {
+  }
+
+  @Override
+  public void preconditionFailed(final PreconditionFailedException error, final FailOption onFail) {
+  }
+
+  @Override
+  public void ran(final Change change, final ChangeSet changeSet, final DatabaseChangeLog changeLog,
+      final Database database) {
+    if (!(change instanceof AbstractChange)) {
+      throw new LQMGException(
+          "Change must be a descendant of AbstractChange: " + change.getClass().getName(),
+          null);
+    }
+    AbstractChange abstractChange = (AbstractChange) change;
+    ResourceAccessor resourceAccessor = abstractChange.getResourceAccessor();
+    if (!(resourceAccessor instanceof OSGiResourceAccessor)) {
+      throw new LQMGException("Resource accessor must have type OSGiResourceAccessor: "
+          + resourceAccessor.getClass().getName(), null);
     }
 
-    @Override
-    public void preconditionErrored(final PreconditionErrorException error, final ErrorOption onError) {
+    OSGiResourceAccessor osgiResourceAccessor = (OSGiResourceAccessor) resourceAccessor;
+
+    Bundle bundle = osgiResourceAccessor.getBundle();
+    Map<String, Object> attributes = osgiResourceAccessor.getAttributes();
+
+    String configPath = (String) attributes.get(LQMG.CAPABILITY_LQMG_CONFIG_RESOURCE);
+    if (configPath != null) {
+      configurationContainer.addConfiguration(new ConfigPath(bundle, configPath));
     }
+  }
 
-    @Override
-    public void preconditionFailed(final PreconditionFailedException error, final FailOption onFail) {
-    }
+  @Override
+  public void ran(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog,
+      final Database database,
+      final ExecType execType) {
+  }
 
-    @Override
-    public void ran(final Change change, final ChangeSet changeSet, final DatabaseChangeLog changeLog,
-            final Database database) {
-        if (!(change instanceof AbstractChange)) {
-            throw new LQMGException("Change must be a descendant of AbstractChange: " + change.getClass().getName(),
-                    null);
-        }
-        AbstractChange abstractChange = (AbstractChange) change;
-        ResourceAccessor resourceAccessor = abstractChange.getResourceAccessor();
-        if (!(resourceAccessor instanceof OSGiResourceAccessor)) {
-            throw new LQMGException("Resource accessor must have type OSGiResourceAccessor: "
-                    + resourceAccessor.getClass().getName(), null);
-        }
+  @Override
+  public void rolledBack(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog,
+      final Database database) {
+  }
 
-        OSGiResourceAccessor osgiResourceAccessor = (OSGiResourceAccessor) resourceAccessor;
+  @Override
+  public void willRun(final Change change, final ChangeSet changeSet,
+      final DatabaseChangeLog changeLog,
+      final Database database) {
+  }
 
-        Bundle bundle = osgiResourceAccessor.getBundle();
-        Map<String, Object> attributes = osgiResourceAccessor.getAttributes();
-
-        String configPath = (String) attributes.get(LQMG.CAPABILITY_LQMG_CONFIG_RESOURCE);
-        if (configPath != null) {
-            configurationContainer.addConfiguration(new ConfigPath(bundle, configPath));
-        }
-    }
-
-    @Override
-    public void ran(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog, final Database database,
-            final ExecType execType) {
-    }
-
-    @Override
-    public void rolledBack(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog, final Database database) {
-    }
-
-    @Override
-    public void willRun(final Change change, final ChangeSet changeSet, final DatabaseChangeLog changeLog,
-            final Database database) {
-    }
-
-    @Override
-    public void willRun(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog, final Database database,
-            final RunStatus runStatus) {
-    }
+  @Override
+  public void willRun(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog,
+      final Database database,
+      final RunStatus runStatus) {
+  }
 
 }
