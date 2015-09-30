@@ -84,8 +84,7 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
   }
 
   @Override
-  public String getClassName(final String tableName) {
-    SchemaAndTable schemaAndTable = new SchemaAndTable(null, tableName);
+  public String getClassName(final SchemaAndTable schemaAndTable) {
 
     String simpleName = classNameCache.get(schemaAndTable);
     if (simpleName != null) {
@@ -185,7 +184,7 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
   @Override
   public String getPackage(final String basePackage, final SchemaAndTable schemaAndTable) {
 
-    String simpleName = getClassName(schemaAndTable.getTable());
+    String simpleName = getClassName(schemaAndTable);
     if (simpleName == null) {
       throw new LQMGException("Cannot resolve class name for '" + schemaAndTable.getTable()
           + "' table in '" + schemaAndTable.getSchema() + "' schema.", null);
@@ -298,7 +297,7 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
     String javaPackage = namingRule.getPackage();
     if ((packages.size() > 0) && !packages.contains(javaPackage)) {
       LOGGER.info("Java package '" + javaPackage + "' is not included, ignoring table '"
-          + schemaAndTable.getTable() + "' from schema '.");
+          + schemaAndTable.getTable() + "' from schema '." + schemaAndTable.getSchema());
       return false;
     }
 

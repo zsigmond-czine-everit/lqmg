@@ -256,7 +256,7 @@
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-sql-codegen</artifactId>
-      <version>4.0.4.BUILD-SNAPSHOT</version>
+      <version>4.0.5.BUILD-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
