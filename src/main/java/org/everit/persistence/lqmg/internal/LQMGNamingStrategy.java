@@ -136,7 +136,7 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
 
     SchemaAndTable schemaAndTable = getSchemaAndTable(entityType);
 
-    String propertyName = getClassName(schemaAndTable.getTable());
+    String propertyName = getClassName(schemaAndTable);
     ConfigValue<? extends AbstractNamingRuleType> config =
         configurationContainer.findConfigForEntity(schemaAndTable);
 
