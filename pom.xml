@@ -24,12 +24,12 @@
   <parent>
     <groupId>org.everit.config</groupId>
     <artifactId>org.everit.config.oss</artifactId>
-    <version>7.0.1</version>
+    <version>7.1.0</version>
   </parent>
 
-  <groupId>org.everit.osgi.dev</groupId>
-  <artifactId>org.everit.osgi.dev.lqmg</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <groupId>org.everit.persistence</groupId>
+  <artifactId>org.everit.persistence.lqmg</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
@@ -105,7 +105,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>org.everit.osgi.dev.lqmg.LQMG</mainClass>
+              <mainClass>org.everit.persistence.lqmg.LQMG</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -191,7 +191,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <!-- TODO remove LQMG check exlusions -->
-          <excludes>org/everit/osgi/dev/lqmg/internal/schema/xml/*,org/everit/osgi/dev/lqmg/internal/LQMG*</excludes>
+          <excludes>org/everit/persistence/lqmg/internal/schema/xml/*,org/everit/persistence/lqmg/internal/LQMG*</excludes>
         </configuration>
       </plugin>
       <plugin>

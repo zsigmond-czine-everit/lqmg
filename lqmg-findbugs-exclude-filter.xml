@@ -18,10 +18,10 @@
 -->
 <FindBugsFilter>
   <Match>
-    <Package name="~org\.everit\.osgi\.dev\.lqmg\.internal\.schema\.xml.*" />
+    <Package name="~org\.everit\.persistence\.lqmg\.internal\.schema\.xml.*" />
   </Match>
   <Match>
-    <Class name="~org\.everit\.osgi\.dev\.lqmg\.internal\.LQMG.*" />
+    <Class name="~org\.everit\.persistence\.lqmg\.internal\.LQMG.*" />
   </Match>
   <Match>
     <Bug
