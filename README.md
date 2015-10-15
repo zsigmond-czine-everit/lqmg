@@ -23,7 +23,7 @@ download the distribution package that contains all the necessary
 dependencies. To get the necessary information how to use it, run the
 following command:
 
-<pre><code>java -jar org.everit.db.lqmg-2.1.0.jar --help</code></pre>
+<pre><code>java -jar org.everit.persistence.lqmg-1.0.0.jar --help</code></pre>
 
 ## Configuration XMLs
 
