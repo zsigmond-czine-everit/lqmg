@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.osgi.dev.lqmg;
+package org.everit.persistence.lqmg;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;

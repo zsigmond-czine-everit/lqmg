@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.osgi.dev.lqmg.internal.liquibase;
+package org.everit.persistence.lqmg.internal.liquibase;
 
 import java.util.Map;
 
-import org.everit.osgi.dev.lqmg.LQMG;
-import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.dev.lqmg.internal.ConfigPath;
-import org.everit.osgi.dev.lqmg.internal.ConfigurationContainer;
 import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
+import org.everit.persistence.lqmg.LQMG;
+import org.everit.persistence.lqmg.LQMGException;
+import org.everit.persistence.lqmg.internal.ConfigPath;
+import org.everit.persistence.lqmg.internal.ConfigurationContainer;
 import org.osgi.framework.Bundle;
 
 import liquibase.change.AbstractChange;

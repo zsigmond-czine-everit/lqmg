@@ -24,10 +24,10 @@ import java.util.UUID;
 import javax.xml.bind.UnmarshalException;
 
 import org.apache.commons.io.FileUtils;
-import org.everit.osgi.dev.lqmg.GenerationProperties;
-import org.everit.osgi.dev.lqmg.LQMG;
-import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.dev.lqmg.LQMGMain;
+import org.everit.persistence.lqmg.GenerationProperties;
+import org.everit.persistence.lqmg.LQMG;
+import org.everit.persistence.lqmg.LQMGException;
+import org.everit.persistence.lqmg.LQMGMain;
 import org.junit.Assert;
 import org.junit.Test;
 

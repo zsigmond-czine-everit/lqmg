@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.osgi.dev.lqmg.internal;
+package org.everit.persistence.lqmg.internal;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,12 +28,12 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBElement;
 
-import org.everit.osgi.dev.lqmg.LQMGException;
-import org.everit.osgi.dev.lqmg.internal.schema.xml.AbstractNamingRuleType;
-import org.everit.osgi.dev.lqmg.internal.schema.xml.ClassNameRuleType;
-import org.everit.osgi.dev.lqmg.internal.schema.xml.PropertyMappingType;
-import org.everit.osgi.dev.lqmg.internal.schema.xml.PropertyMappingsType;
-import org.everit.osgi.dev.lqmg.internal.schema.xml.RegexRuleType;
+import org.everit.persistence.lqmg.LQMGException;
+import org.everit.persistence.lqmg.internal.schema.xml.AbstractNamingRuleType;
+import org.everit.persistence.lqmg.internal.schema.xml.ClassNameRuleType;
+import org.everit.persistence.lqmg.internal.schema.xml.PropertyMappingType;
+import org.everit.persistence.lqmg.internal.schema.xml.PropertyMappingsType;
+import org.everit.persistence.lqmg.internal.schema.xml.RegexRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class LQMGNamingStrategy extends DefaultNamingStrategy {
   /**
    * Constants for DB attributes.
    */
-  private static enum DBAttributeType {
+  private enum DBAttributeType {
 
     COLUMN("column"), FOREIGN_KEY("foreignKey"), PRIMARY_KEY("primaryKey");
 
