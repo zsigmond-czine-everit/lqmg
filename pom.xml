@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.everit.config</groupId>
     <artifactId>org.everit.config.oss</artifactId>
-    <version>7.1.0</version>
+    <version>7.2.0</version>
   </parent>
 
   <groupId>org.everit.persistence</groupId>
@@ -256,7 +256,7 @@
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-sql-codegen</artifactId>
-      <version>4.0.5.BUILD-SNAPSHOT</version>
+      <version>4.0.6</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
@@ -311,4 +311,5 @@
       <version>2.2.10-b140310.1920</version>
     </dependency>
   </dependencies>
+
 </project>

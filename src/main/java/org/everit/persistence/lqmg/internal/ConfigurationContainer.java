@@ -54,7 +54,7 @@ public class ConfigurationContainer {
    */
   private static class NullConfigValue extends ConfigValue<AbstractNamingRuleType> {
 
-    public NullConfigValue() {
+    NullConfigValue() {
       super(null, null, null);
     }
 
