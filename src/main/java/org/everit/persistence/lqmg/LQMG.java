@@ -36,8 +36,8 @@ import org.everit.persistence.lqmg.internal.ConfigPath;
 import org.everit.persistence.lqmg.internal.ConfigurationContainer;
 import org.everit.persistence.lqmg.internal.EquinoxHackUtilImpl;
 import org.everit.persistence.lqmg.internal.HackUtil;
-import org.everit.persistence.lqmg.internal.LQMGChangeExecListener;
-import org.everit.persistence.lqmg.internal.LQMGMetadataExporter;
+import org.everit.persistence.lqmg.internal.LQMGNamingStrategy;
+import org.everit.persistence.lqmg.internal.liquibase.LQMGChangeExecListener;
 import org.h2.Driver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -47,7 +47,11 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.FrameworkWiring;
 
+import com.querydsl.sql.codegen.MetaDataExporter;
+import com.querydsl.sql.codegen.NamingStrategy;
+
 import liquibase.Liquibase;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.H2Database;
@@ -147,15 +151,23 @@ public final class LQMG {
   }
 
   private static void exportMetaData(final GenerationProperties parameters,
-      final Connection connection, final ConfigurationContainer configContainer)
+      final Connection connection, final ConfigurationContainer configurationContainer)
           throws SQLException {
     LOGGER.log(Level.INFO, "Start meta data export.");
-    LQMGMetadataExporter metaDataExporter =
-        new LQMGMetadataExporter(configContainer, parameters.packages);
 
+    MetaDataExporter metaDataExporter = new MetaDataExporter();
+
+    NamingStrategy namingStrategy =
+        new LQMGNamingStrategy(configurationContainer, parameters.packages);
+
+    metaDataExporter.setNamePrefix("");
+    metaDataExporter.setNameSuffix("");
+    metaDataExporter.setNamingStrategy(namingStrategy);
+    metaDataExporter.setSchemaToPackage(true);
     metaDataExporter.setTargetFolder(new File(parameters.targetFolder));
     metaDataExporter.setInnerClassesForKeys(parameters.innerClassesForKeys);
     metaDataExporter.export(connection.getMetaData());
+
     LOGGER.log(Level.INFO, "Finish meta data export.");
   }
 
@@ -362,7 +374,7 @@ public final class LQMG {
         configContainer.addConfiguration(new ConfigPath(null, parameters.configurationPath));
       }
 
-      LQMGChangeExecListener lqmgChangeExecListener = new LQMGChangeExecListener(configContainer);
+      ChangeExecListener lqmgChangeExecListener = new LQMGChangeExecListener(configContainer);
       liquibase.setChangeExecListener(lqmgChangeExecListener);
 
       liquibase.update((String) null);

@@ -29,8 +29,11 @@ import org.everit.persistence.lqmg.LQMG;
 import org.everit.persistence.lqmg.LQMGException;
 import org.everit.persistence.lqmg.LQMGMain;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LQMGTest {
 
   private static void deleteFolder(final File folder) {

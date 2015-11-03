@@ -42,7 +42,7 @@ import org.everit.persistence.lqmg.internal.schema.xml.RegexRuleType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
-import com.mysema.query.sql.codegen.NamingStrategy;
+import com.querydsl.sql.SchemaAndTable;
 
 /**
  * The configuration container used to code generation.
@@ -60,28 +60,26 @@ public class ConfigurationContainer {
 
   }
 
-  private final Map<ConfigKey, ConfigValue<? extends AbstractNamingRuleType>> cache =
-      new HashMap<ConfigKey, ConfigValue<? extends AbstractNamingRuleType>>();
+  private final Map<SchemaAndTable, ConfigValue<? extends AbstractNamingRuleType>> cache =
+      new HashMap<>();
 
-  private final Map<ConfigKey, String> classNameCache = new HashMap<ConfigKey, String>();
-
-  private final Map<ConfigKey, ConfigValue<ClassNameRuleType>> classNameRuleMap =
-      new HashMap<ConfigKey, ConfigValue<ClassNameRuleType>>();
+  private final Map<SchemaAndTable, ConfigValue<ClassNameRuleType>> classNameRuleMap =
+      new HashMap<>();
 
   private final JAXBContext jaxbContext;
 
-  private final Map<ConfigKey, ConfigValue<ClassNameRuleType>> mainClassNameRuleMap =
-      new HashMap<ConfigKey, ConfigValue<ClassNameRuleType>>();
+  private final Map<SchemaAndTable, ConfigValue<ClassNameRuleType>> mainClassNameRuleMap =
+      new HashMap<>();
 
-  private final Map<ConfigKey, ConfigValue<RegexRuleType>> mainRegexRuleMap =
-      new HashMap<ConfigKey, ConfigValue<RegexRuleType>>();
+  private final Map<SchemaAndTable, ConfigValue<RegexRuleType>> mainRegexRuleMap =
+      new HashMap<>();
 
-  private final Map<String, Pattern> patternsByRegex = new HashMap<String, Pattern>();
+  private final Map<String, Pattern> patternsByRegex = new HashMap<>();
 
-  private final Set<ConfigPath> processedConfigs = new HashSet<ConfigPath>();
+  private final Set<ConfigPath> processedConfigs = new HashSet<>();
 
-  private final Map<ConfigKey, ConfigValue<RegexRuleType>> regexRuleMap =
-      new HashMap<ConfigKey, ConfigValue<RegexRuleType>>();
+  private final Map<SchemaAndTable, ConfigValue<RegexRuleType>> regexRuleMap =
+      new HashMap<>();
 
   /**
    * Constructor.
@@ -129,19 +127,20 @@ public class ConfigurationContainer {
     processLQMGType(lqmgType, resource, bundle);
   }
 
-  private <T extends AbstractNamingRuleType> void addValueToConfigMap(final ConfigKey configKey,
+  private <T extends AbstractNamingRuleType> void addValueToConfigMap(
+      final SchemaAndTable schemaAndTable,
       final ConfigValue<T> configValue,
-      final Map<ConfigKey, ConfigValue<T>> configMap) {
+      final Map<SchemaAndTable, ConfigValue<T>> configMap) {
 
-    ConfigValue<? extends AbstractNamingRuleType> cachedValue = cache.get(configKey);
+    ConfigValue<? extends AbstractNamingRuleType> cachedValue = cache.get(schemaAndTable);
     if (cachedValue != null) {
-      cache.remove(configKey);
+      cache.remove(schemaAndTable);
     }
 
-    ConfigValue<T> existingValue = configMap.get(configKey);
+    ConfigValue<T> existingValue = configMap.get(schemaAndTable);
     if (existingValue != null) {
       StringBuilder sb = new StringBuilder("Configuration is defined more than once: ").append(
-          configKey.toString()).append("\n");
+          schemaAndTable.toString()).append("\n");
 
       Bundle bundle = configValue.bundle;
       if (bundle != null) {
@@ -157,16 +156,17 @@ public class ConfigurationContainer {
 
       throw new LQMGException(sb.toString(), null);
     }
-    configMap.put(configKey, configValue);
+    configMap.put(schemaAndTable, configValue);
   }
 
   /**
    * Finds a {@link ConfigValue} based on schemaName and entityName.
    */
-  public ConfigValue<? extends AbstractNamingRuleType> findConfigForEntity(final String schemaName,
-      final String entityName) {
-    ConfigKey configKey = new ConfigKey(schemaName, entityName);
-    ConfigValue<? extends AbstractNamingRuleType> configValue = cache.get(configKey);
+  public ConfigValue<? extends AbstractNamingRuleType> findConfigForEntity(
+      final SchemaAndTable schemaAndTable) {
+
+    ConfigValue<? extends AbstractNamingRuleType> configValue = cache.get(schemaAndTable);
+
     if (configValue != null) {
       if (configValue instanceof NullConfigValue) {
         return null;
@@ -175,74 +175,78 @@ public class ConfigurationContainer {
       }
     }
 
-    configValue = findEntityConfigInMap(schemaName, entityName, mainClassNameRuleMap);
+    configValue = findEntityConfigInMap(schemaAndTable, mainClassNameRuleMap);
     if (configValue != null) {
       return configValue;
     }
-    configValue = findRegexRuleInMap(schemaName, entityName, mainRegexRuleMap);
+    configValue = findRegexRuleInMap(schemaAndTable, mainRegexRuleMap);
     if (configValue != null) {
       return configValue;
     }
-    configValue = findEntityConfigInMap(schemaName, entityName, classNameRuleMap);
+    configValue = findEntityConfigInMap(schemaAndTable, classNameRuleMap);
     if (configValue != null) {
       return configValue;
     }
 
-    return findRegexRuleInMap(schemaName, entityName, regexRuleMap);
+    return findRegexRuleInMap(schemaAndTable, regexRuleMap);
   }
 
-  private ConfigValue<ClassNameRuleType> findEntityConfigInMap(final String schemaName,
-      final String entityName,
-      final Map<ConfigKey, ConfigValue<ClassNameRuleType>> map) {
+  private ConfigValue<ClassNameRuleType> findEntityConfigInMap(final SchemaAndTable schemaAndTable,
+      final Map<SchemaAndTable, ConfigValue<ClassNameRuleType>> map) {
 
-    ConfigKey configKey = new ConfigKey(schemaName, entityName);
-    ConfigValue<ClassNameRuleType> configValue = map.get(configKey);
-    if (configValue != null) {
-      return configValue;
+    ConfigValue<ClassNameRuleType> configValue = map.get(schemaAndTable);
+
+    // No schema matched record, trying to search on records where schema is not defined
+    if (configValue == null) {
+      SchemaAndTable noSchemaAndTable = new SchemaAndTable(null, schemaAndTable.getTable());
+      configValue = map.get(noSchemaAndTable);
     }
-    if (schemaName != null) {
-      ConfigKey nullSchemaConfigKey = new ConfigKey(null, entityName);
-      return map.get(nullSchemaConfigKey);
-    }
-    return null;
+    return configValue;
   }
 
-  private ConfigValue<RegexRuleType> findRegexRuleInMap(final String schemaName,
-      final String entityName, final Map<ConfigKey, ConfigValue<RegexRuleType>> map) {
+  private ConfigValue<RegexRuleType> findRegexRuleInMap(final SchemaAndTable schemaAndTable,
+      final Map<SchemaAndTable, ConfigValue<RegexRuleType>> map) {
 
     List<ConfigValue<RegexRuleType>> result = new ArrayList<ConfigValue<RegexRuleType>>();
+
+    String schemaName = schemaAndTable.getSchema();
+    String tableName = schemaAndTable.getTable();
+
     if (schemaName != null) {
-      for (Entry<ConfigKey, ConfigValue<RegexRuleType>> entry : map.entrySet()) {
-        ConfigKey entryKey = entry.getKey();
+      for (Entry<SchemaAndTable, ConfigValue<RegexRuleType>> entry : map.entrySet()) {
+        SchemaAndTable entryKey = entry.getKey();
         ConfigValue<RegexRuleType> configValue = entry.getValue();
         String regex = configValue.namingRule.getRegex();
-        if (schemaName.equals(entryKey.schemaName) && matches(regex, entityName)) {
+        if (schemaName.equals(entryKey.getSchema()) && matches(regex, tableName)) {
           result.add(configValue);
         }
       }
     }
-    validateConfigValueResultSize(schemaName, entityName, result);
+    validateConfigValueResultSize(schemaAndTable, result);
     if (result.size() == 1) {
       return result.get(0);
     }
 
     // No schema matched record, trying to search on records where schema is not defined
-    for (Entry<ConfigKey, ConfigValue<RegexRuleType>> entry : map.entrySet()) {
+    for (Entry<SchemaAndTable, ConfigValue<RegexRuleType>> entry : map.entrySet()) {
       ConfigValue<RegexRuleType> configValue = entry.getValue();
       RegexRuleType regexRule = configValue.namingRule;
-      if ((regexRule.getSchema() == null) && matches(regexRule.getRegex(), entityName)) {
+      if ((regexRule.getSchema() == null) && matches(regexRule.getRegex(), tableName)) {
         result.add(configValue);
       }
     }
 
-    validateConfigValueResultSize(schemaName, entityName, result);
+    validateConfigValueResultSize(schemaAndTable, result);
     if (result.size() == 1) {
       return result.get(0);
     }
     return null;
   }
 
-  private Pattern getPatternByRegex(final String regex) {
+  /**
+   * Returns the cached and compiled {@link Pattern} by the given regex.
+   */
+  public Pattern getPatternByRegex(final String regex) {
     Pattern pattern = patternsByRegex.get(regex);
     if (pattern == null) {
       pattern = Pattern.compile(regex);
@@ -261,17 +265,17 @@ public class ConfigurationContainer {
   private void processClassNameRuleType(final String xmlConfigurationPath, final Bundle bundle,
       final AbstractNamingRuleType lqmgAbstractEntity) {
     ClassNameRuleType lqmgEntity = (ClassNameRuleType) lqmgAbstractEntity;
-    ConfigKey configKey = new ConfigKey(lqmgEntity.getSchema(),
-        lqmgEntity.getEntity());
+    SchemaAndTable schemaAndTable = new SchemaAndTable(
+        lqmgEntity.getSchema(), lqmgEntity.getEntity());
     ConfigValue<ClassNameRuleType> configValue =
         new ConfigValue<ClassNameRuleType>(lqmgEntity,
             bundle, xmlConfigurationPath);
 
     validatePackage(configValue);
     if (bundle == null) {
-      addValueToConfigMap(configKey, configValue, mainClassNameRuleMap);
+      addValueToConfigMap(schemaAndTable, configValue, mainClassNameRuleMap);
     } else {
-      addValueToConfigMap(configKey, configValue, classNameRuleMap);
+      addValueToConfigMap(schemaAndTable, configValue, classNameRuleMap);
     }
   }
 
@@ -317,8 +321,8 @@ public class ConfigurationContainer {
   private void processRegexRuleType(final String xmlConfigurationPath, final Bundle bundle,
       final AbstractNamingRuleType lqmgAbstractEntity) {
     RegexRuleType lqmgEntitySet = (RegexRuleType) lqmgAbstractEntity;
-    ConfigKey configKey = new ConfigKey(lqmgEntitySet.getSchema(),
-        lqmgEntitySet.getRegex());
+    SchemaAndTable configKey = new SchemaAndTable(
+        lqmgEntitySet.getSchema(), lqmgEntitySet.getRegex());
     ConfigValue<RegexRuleType> configValue = new ConfigValue<RegexRuleType>(lqmgEntitySet,
         bundle, xmlConfigurationPath);
 
@@ -330,55 +334,11 @@ public class ConfigurationContainer {
     }
   }
 
-  /**
-   * Resolves the class name of the specified schemaName and entityName based on the
-   * {@link NamingStrategy}.
-   */
-  public String resolveClassName(final String schemaName, final String entityName,
-      final NamingStrategy namingStrategy) {
-    ConfigKey key = new ConfigKey(schemaName, entityName);
-    String className = classNameCache.get(key);
-    if (className != null) {
-      return className;
-    }
-    ConfigValue<? extends AbstractNamingRuleType> configValue =
-        findConfigForEntity(schemaName, entityName);
-    if (configValue == null) {
-      return null;
-    }
-
-    AbstractNamingRuleType namingRule = configValue.namingRule;
-    if (namingRule instanceof RegexRuleType) {
-      RegexRuleType regexRule = (RegexRuleType) namingRule;
-      String regex = regexRule.getRegex();
-      String replacement = regexRule.getReplacement();
-      Pattern pattern = getPatternByRegex(regex);
-      Matcher matcher = pattern.matcher(entityName);
-      String replacedEntityName = matcher.replaceAll(replacement);
-      className = namingStrategy.getClassName(replacedEntityName);
-    } else if (namingRule instanceof ClassNameRuleType) {
-      className = ((ClassNameRuleType) namingRule).getClazz();
-    }
-
-    String prefix = namingRule.getPrefix();
-    if (prefix != null) {
-      className = prefix + className;
-    }
-
-    String suffix = namingRule.getSuffix();
-    if (suffix != null) {
-      className = className + suffix;
-    }
-
-    classNameCache.put(key, className);
-    return className;
-  }
-
-  private void throwMultipleMatchingRegexException(final String schemaName, final String entityName,
+  private void throwMultipleMatchingRegexException(final SchemaAndTable schemaAndTable,
       final List<ConfigValue<RegexRuleType>> matchingConfigs) {
 
     StringBuilder sb = new StringBuilder("Cannot decide which configuration should be applied to '")
-        .append(entityName).append("' entity of '").append(schemaName)
+        .append(schemaAndTable.getTable()).append("' table of '").append(schemaAndTable.getSchema())
         .append("' schema. Found matchings:\n");
 
     for (ConfigValue<RegexRuleType> configValue : matchingConfigs) {
@@ -406,10 +366,10 @@ public class ConfigurationContainer {
     }
   }
 
-  private void validateConfigValueResultSize(final String schemaName, final String entityName,
+  private void validateConfigValueResultSize(final SchemaAndTable schemaAndTable,
       final List<ConfigValue<RegexRuleType>> result) {
     if (result.size() > 1) {
-      throwMultipleMatchingRegexException(schemaName, entityName, result);
+      throwMultipleMatchingRegexException(schemaAndTable, result);
     }
   }
 

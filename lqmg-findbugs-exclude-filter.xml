@@ -21,7 +21,7 @@
     <Package name="~org\.everit\.persistence\.lqmg\.internal\.schema\.xml.*" />
   </Match>
   <Match>
-    <Class name="~org\.everit\.persistence\.lqmg\.internal\.LQMG.*" />
+    <Class name="~org\.everit\.persistence\.lqmg\.internal\.liquibase\.*" />
   </Match>
   <Match>
     <Bug
