@@ -17,7 +17,7 @@ package org.everit.persistence.lqmg.internal.liquibase;
 
 import java.util.Map;
 
-import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
+import org.everit.persistence.liquibase.ext.osgi.EOSGiResourceAccessor;
 import org.everit.persistence.lqmg.LQMG;
 import org.everit.persistence.lqmg.LQMGException;
 import org.everit.persistence.lqmg.internal.ConfigPath;
@@ -34,6 +34,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.osgi.OSGiResourceAccessor;
 import liquibase.precondition.core.PreconditionContainer.ErrorOption;
 import liquibase.precondition.core.PreconditionContainer.FailOption;
 import liquibase.resource.ResourceAccessor;
@@ -70,7 +71,7 @@ public class LQMGChangeExecListener implements ChangeExecListener {
           + resourceAccessor.getClass().getName(), null);
     }
 
-    OSGiResourceAccessor osgiResourceAccessor = (OSGiResourceAccessor) resourceAccessor;
+    EOSGiResourceAccessor osgiResourceAccessor = (EOSGiResourceAccessor) resourceAccessor;
 
     Bundle bundle = osgiResourceAccessor.getBundle();
     Map<String, Object> attributes = osgiResourceAccessor.getAttributes();
@@ -90,6 +91,13 @@ public class LQMGChangeExecListener implements ChangeExecListener {
   @Override
   public void rolledBack(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog,
       final Database database) {
+  }
+
+  @Override
+  public void runFailed(final ChangeSet changeSet, final DatabaseChangeLog databaseChangeLog,
+      final Database database,
+      final Exception exception) {
+
   }
 
   @Override

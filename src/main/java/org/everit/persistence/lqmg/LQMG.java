@@ -23,15 +23,15 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-import org.everit.osgi.liquibase.bundle.LiquibaseOSGiUtil;
-import org.everit.osgi.liquibase.bundle.OSGiResourceAccessor;
+import org.everit.persistence.liquibase.ext.osgi.EOSGiResourceAccessor;
+import org.everit.persistence.liquibase.ext.osgi.util.BundleResource;
+import org.everit.persistence.liquibase.ext.osgi.util.LiquibaseOSGiUtil;
 import org.everit.persistence.lqmg.internal.ConfigPath;
 import org.everit.persistence.lqmg.internal.ConfigurationContainer;
 import org.everit.persistence.lqmg.internal.EquinoxHackUtilImpl;
@@ -44,7 +44,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 import com.querydsl.sql.codegen.MetaDataExporter;
@@ -79,24 +78,14 @@ public final class LQMG {
    */
   private static final Logger LOGGER = Logger.getLogger(LQMG.class.getName());
 
-  private static void checkMatchingBundleSize(final GenerationProperties parameters,
-      final Map<Bundle, List<BundleCapability>> matchingBundles) {
-    if (matchingBundles.size() > 1) {
+  private static void checkMatchingBundleResourceSize(final GenerationProperties parameters,
+      final List<BundleResource> bundleResources) {
+    if (bundleResources.size() > 1) {
       LOGGER.log(Level.WARNING,
           "Found multiple bundles containing matching capabilities for schema"
               + " expression: '" + parameters.capability
               + "'. Using the first one from list: "
-              + matchingBundles.keySet().toString());
-    }
-  }
-
-  private static void checkMatchingCapabilitiesSize(final Bundle bundle,
-      final List<BundleCapability> matchingCapabilities) {
-    if (matchingCapabilities.size() > 1) {
-      LOGGER.warning("There are multiple capabilities in bundle "
-          + bundle.toString()
-          + ". Using the first one from the list: "
-          + matchingCapabilities.toString());
+              + bundleResources.toString());
     }
   }
 
@@ -184,12 +173,11 @@ public final class LQMG {
       tempDirectory = LQMG.createTempDirectory();
       osgiContainer =
           LQMG.startOSGiContainer(parameters.bundleLocations, tempDirectory.getAbsolutePath());
-
-      Map<Bundle, List<BundleCapability>> matchingBundles = LiquibaseOSGiUtil
+      List<BundleResource> bundleResources = LiquibaseOSGiUtil
           .findBundlesBySchemaExpression(parameters.capability,
               osgiContainer.getBundleContext(), Bundle.RESOLVED);
 
-      if (matchingBundles.size() == 0) {
+      if (bundleResources.size() == 0) {
         if (parameters.hackWires) {
           LOGGER.info(
               "No matching bundle found. Trying to find unresolved bundles and hack their wires.");
@@ -197,28 +185,21 @@ public final class LQMG {
           FrameworkWiring frameworkWiring = osgiContainer.adapt(FrameworkWiring.class);
           frameworkWiring.resolveBundles(null);
 
-          matchingBundles = LiquibaseOSGiUtil
+          bundleResources = LiquibaseOSGiUtil
               .findBundlesBySchemaExpression(parameters.capability,
                   osgiContainer.getBundleContext(), Bundle.RESOLVED);
         } else {
           LOGGER.severe("No matching bundle found. Probably setting hackWires to true would help");
         }
-        if (matchingBundles.size() == 0) {
+        if (bundleResources.size() == 0) {
           LQMG.throwCapabilityNotFound(parameters, osgiContainer);
         }
       }
 
-      LQMG.checkMatchingBundleSize(parameters, matchingBundles);
+      LQMG.checkMatchingBundleResourceSize(parameters, bundleResources);
 
-      Entry<Bundle, List<BundleCapability>> matchingSchema =
-          matchingBundles.entrySet().iterator().next();
-      Bundle bundle = matchingSchema.getKey();
-      List<BundleCapability> matchingCapabilities = matchingSchema.getValue();
-
-      LQMG.checkMatchingCapabilitiesSize(bundle, matchingCapabilities);
-
-      BundleCapability matchingCapability = matchingCapabilities.get(0);
-      LQMG.tryCodeGeneration(parameters, bundle, matchingCapability);
+      BundleResource bundleResource = bundleResources.get(0);
+      LQMG.tryCodeGeneration(parameters, bundleResource.bundle, bundleResource.attributes);
 
     } catch (IOException e) {
 
@@ -337,7 +318,7 @@ public final class LQMG {
 
   private static void tryCodeGeneration(
       final GenerationProperties parameters, final Bundle bundle,
-      final BundleCapability bundleCapability) {
+      final Map<String, Object> bundleCapabilityAttributes) {
 
     LOGGER.log(Level.INFO, "Load driver.");
     Driver h2Driver = Driver.load();
@@ -361,11 +342,13 @@ public final class LQMG {
       database.setConnection(new JdbcConnection(connection));
 
       LOGGER.log(Level.INFO, "Start LiquiBase and update.");
-      Map<String, Object> attributes = bundleCapability.getAttributes();
+      // Map<String, Object> attributes = bundleCapabilityAttributes.getAttributes();
 
-      ResourceAccessor resourceAccessor = new OSGiResourceAccessor(bundle, attributes);
+      ResourceAccessor resourceAccessor =
+          new EOSGiResourceAccessor(bundle, bundleCapabilityAttributes);
 
-      String schemaResource = (String) attributes.get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
+      String schemaResource =
+          (String) bundleCapabilityAttributes.get(LiquibaseOSGiUtil.ATTR_SCHEMA_RESOURCE);
       Liquibase liquibase = new Liquibase(schemaResource, resourceAccessor, database);
 
       ConfigurationContainer configContainer = new ConfigurationContainer();
