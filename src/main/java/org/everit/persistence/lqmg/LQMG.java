@@ -342,7 +342,6 @@ public final class LQMG {
       database.setConnection(new JdbcConnection(connection));
 
       LOGGER.log(Level.INFO, "Start LiquiBase and update.");
-      // Map<String, Object> attributes = bundleCapabilityAttributes.getAttributes();
 
       ResourceAccessor resourceAccessor =
           new EOSGiResourceAccessor(bundle, bundleCapabilityAttributes);
